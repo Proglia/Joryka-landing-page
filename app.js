@@ -31,6 +31,21 @@ $$('.js-whatsapp').forEach((a) => {
   a.rel = 'noopener';
 });
 
+/* ---------------------------------------------------------------- small-screen menu */
+{
+  const btn = $(".nav-toggle"), menu = $("#site-menu");
+  const set = (open) => {
+    menu.hidden = !open;
+    btn.setAttribute("aria-expanded", String(open));
+    btn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+  };
+  btn.addEventListener("click", () => set(menu.hidden));
+  menu.addEventListener("click", (e) => { if (e.target.closest("a")) set(false); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !menu.hidden) { set(false); btn.focus(); } });
+  document.addEventListener("click", (e) => { if (!menu.hidden && !e.target.closest(".site-header")) set(false); });
+  matchMedia("(min-width: 1101px)").addEventListener("change", (m) => { if (m.matches) set(false); });
+}
+
 /* ---------------------------------------------------------------- analytics hook (no personal data) */
 document.addEventListener('click', (e) => {
   const t = e.target.closest('[data-track]');

@@ -93,7 +93,19 @@ FORM: category standard (classic SaaS), the user's restored Figma design; the he
       <a href="#contact" class="btn btn-ghost btn-sm js-whatsapp wa-link" data-track="whatsapp_click"><svg class="wa"><use href="#i-msg"/></svg>WhatsApp</a>
       <a href="#" class="btn btn-ghost btn-sm js-login" data-track="login_click"><svg><use href="#i-login"/></svg>Login</a>
       <a href="#contact" class="btn btn-sm" data-track="header_demo_cta_click">Request a Demo</a>
+      <button type="button" class="nav-toggle" aria-expanded="false" aria-controls="site-menu" aria-label="Open menu"><svg aria-hidden="true"><use href="#i-menu"/></svg><svg aria-hidden="true"><use href="#i-x"/></svg></button>
     </div>
+  </div>
+  <div class="site-menu" id="site-menu" hidden>
+    <nav class="container" aria-label="Main">
+      <a href="#features">Features</a>
+      <a href="#offline">How offline works</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#contact">Contact</a>
+      <span class="menu-actions">
+        <a href="#" class="btn btn-ghost js-login" data-track="login_click"><svg><use href="#i-login"/></svg>Login</a>
+      </span>
+    </nav>
   </div>
 </header>
 
@@ -287,14 +299,10 @@ FORM: category standard (classic SaaS), the user's restored Figma design; the he
         <li><span><svg><use href="#i-book"/></svg></span><p><b>Keep your records together</b>Sales, stock and customer credit stay in one system — not scattered across notebooks.</p></li>
         <li><span><svg><use href="#i-wifi-off"/></svg></span><p><b>Always know your status</b>A clear connection indicator shows whether you are online, and how many changes are waiting to sync.</p></li>
       </ul>
-      <a class="btn btn-lg" href="#contact" data-track="offline_demo_cta_click">Request a Demo<svg><use href="#i-arrow"/></svg></a>
+      <a class="btn btn-lg btn-light" href="#contact" data-track="offline_demo_cta_click">Request a Demo<svg><use href="#i-arrow"/></svg></a>
     </div>
     <div class="off-visual" aria-hidden="true" data-reveal>
       <div class="o-scene">
-        <div class="o-win">
-          <span class="o-rail"><i></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i></span>
-          <span class="o-grid"><span class="o-pc" style="--s:#00C950"><b>Vegetable Oil 1L</b><i>OIL-001</i><em><u>2,800.00</u><u>33,600.00</u></em></span><span class="o-pc" style="--s:#F9B80A"><b>Sugar 500g</b><i>SGR-500</i><em><u>900.00</u><u>10,800.00</u></em></span><span class="o-pc" style="--s:#00C950"><b>Instant Noodles 70g</b><i>NDL-070</i><em><u>650.00</u><u>7,800.00</u></em></span><span class="o-pc" style="--s:#00C950"><b>Evaporated Milk 160g</b><i>EVM-160</i><em><u>450.00</u><u>5,400.00</u></em></span></span>
-        </div>
         <div class="o-cart" data-net="offline">
           <p class="o-banner"><svg><use href="#i-wifi-off"/></svg><span><b>You’re offline</b><i>Your changes are saved locally and will sync once you’re back online.</i></span><em>3 pending</em></p>
           <p class="o-head"><b><svg><use href="#i-cart"/></svg>Cart</b><span class="o-count">3</span></p>
