@@ -44,7 +44,7 @@ const CONFIG = {
 ```
 
 - **`loginUrl`:** until it's set, the Login links stay on the page.
-- **`whatsappNumber`:** until it's set, WhatsApp buttons scroll to the contact section instead of opening `wa.me`. The client's WhatsApp numbers are +234 902 231 0523 and +1 857 260 9455; ask the client which one the site should open.
+- **`whatsappNumber`:** until it's set, WhatsApp buttons scroll to the contact section instead of opening `wa.me`. Use the official business number the client has approved for the site.
 - **`demoEndpoint`:** until it's set, the demo form validates but shows "Preview only… nothing was sent." Once set, it POSTs the form fields as JSON, plus `source_page` and `created_at`.
 
 **Analytics.** Buttons and links carry `data-track` names. If a `window.dataLayer` exists (for example, Google Tag Manager), each click is pushed as `{ event, placement }`. No personal data is sent.
