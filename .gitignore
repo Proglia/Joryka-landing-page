@@ -1,0 +1,9 @@
+# design-tool working files (not part of the site)
+.impeccable/
+.taste-skill/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+node_modules/

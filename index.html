@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="en-NG">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Joryka — Know your stock. Track your money. Grow your business.</title>
+<meta name="description" content="Joryka brings sales, inventory and customer credit together in one system for retail and wholesale businesses in Nigeria. Sales keep recording offline and sync when you’re back. Request a demo.">
+<meta name="theme-color" content="#11102D">
+<link rel="icon" href="assets/logo-icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<!--
+THESIS: Joryka's main features are the page's signature: in the hero six feature tiles orbit a working copy of the real app, and each one opens its feature in it.
+OWN-WORLD: the app's own visual language, copied from the shipped app's screens. White and #F6F5FC paper, navy #11102D sidebar and offline band, brand blue #2E4AFF for actions, green #0AEB95 active marker, one colour per feature tile, pill buttons, 16px cards, 20px windows, Inter.
+STORY: read the promise, try any main feature in the playground, watch every module scroll past, read the seven features, see why offline matters, check launch pricing, ask for a walkthrough.
+FIRST VIEWPORT: centred two-line headline with the second line in blue, one sentence, two pill CTAs; the playground's tiles and window start inside the first screen.
+FORM: category standard (classic SaaS), the user's restored Figma design; the hero playground is the user's floating tiles made interactive around a faithful app window.
+-->
+<a class="skip" href="#main">Skip to content</a>
+
+<svg class="sprite" aria-hidden="true" focusable="false">
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></symbol>
+  <symbol id="i-cart" viewBox="0 0 24 24"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></symbol>
+  <symbol id="i-package" viewBox="0 0 24 24"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 7.703 4.734a2 2 0 0 0 1.994 0L20.7 7"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></symbol>
+  <symbol id="i-invoice" viewBox="0 0 24 24"><rect width="16" height="20" x="4" y="2" rx="2"/><path d="M12 6v12"/><path d="M15 8.5h-4.5a1.5 1.5 0 0 0 0 3h3a1.5 1.5 0 0 1 0 3H9"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></symbol>
+  <symbol id="i-bars" viewBox="0 0 24 24"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></symbol>
+  <symbol id="i-warehouse" viewBox="0 0 24 24"><path d="M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 3.26 6.5l8-3.2a2 2 0 0 1 1.48 0l8 3.2A2 2 0 0 1 22 8.35Z"/><path d="M6 18h12"/><path d="M6 14h12"/><rect width="12" height="12" x="6" y="10"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+  <symbol id="i-cog" viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+  <symbol id="i-wifi" viewBox="0 0 24 24"><path d="M12 20h.01"/><path d="M2 8.82a15 15 0 0 1 20 0"/><path d="M5 12.859a10 10 0 0 1 14 0"/><path d="M8.5 16.429a5 5 0 0 1 7 0"/></symbol>
+  <symbol id="i-wifi-off" viewBox="0 0 24 24"><path d="M12 20h.01"/><path d="M8.5 16.429a5 5 0 0 1 7 0"/><path d="M5 12.859a10 10 0 0 1 5.17-2.69"/><path d="M19 12.859a10 10 0 0 0-2.007-1.523"/><path d="M2 8.82a15 15 0 0 1 4.177-2.643"/><path d="M22 8.82a15 15 0 0 0-11.288-3.764"/><path d="m2 2 20 20"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></symbol>
+  <symbol id="i-scan" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 7v10"/><path d="M12 7v10"/><path d="M17 7v10"/></symbol>
+  <symbol id="i-truck" viewBox="0 0 24 24"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></symbol>
+  <symbol id="i-clip" viewBox="0 0 24 24"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></symbol>
+  <symbol id="i-swap" viewBox="0 0 24 24"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></symbol>
+  <symbol id="i-archive" viewBox="0 0 24 24"><rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></symbol>
+  <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></symbol>
+  <symbol id="i-ban" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></symbol>
+  <symbol id="i-print" viewBox="0 0 24 24"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/></symbol>
+  <symbol id="i-msg" viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></symbol>
+  <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></symbol>
+  <symbol id="i-cash" viewBox="0 0 24 24"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></symbol>
+  <symbol id="i-card" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></symbol>
+  <symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-trend" viewBox="0 0 24 24"><path d="M22 7 13.5 15.5 8.5 10.5 2 17"/><path d="M16 7h6v6"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+  <symbol id="i-hourglass" viewBox="0 0 24 24"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></symbol>
+  <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></symbol>
+  <symbol id="i-percent" viewBox="0 0 24 24"><line x1="19" x2="5" y1="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></symbol>
+  <symbol id="i-dollar" viewBox="0 0 24 24"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></symbol>
+  <symbol id="i-login" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></symbol>
+  <symbol id="i-expand" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="m21 3-7 7"/><path d="m3 21 7-7"/></symbol>
+</svg>
+
+<header class="site-header">
+  <div class="container bar">
+    <a href="#top" class="brand" aria-label="Joryka home"><img src="assets/logo-light.svg" alt="Joryka" width="301" height="64"></a>
+    <nav class="nav" aria-label="Main">
+      <a href="#features">Features</a>
+      <a href="#offline">How offline works</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <div class="bar-actions">
+      <a href="#contact" class="btn btn-ghost btn-sm js-whatsapp wa-link" data-track="whatsapp_click"><svg class="wa"><use href="#i-msg"/></svg>WhatsApp</a>
+      <a href="#" class="btn btn-ghost btn-sm js-login" data-track="login_click"><svg><use href="#i-login"/></svg>Login</a>
+      <a href="#contact" class="btn btn-sm" data-track="header_demo_cta_click">Request a Demo</a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+<section class="hero" id="top" aria-labelledby="hero-h">
+  <div class="container hero-copy" data-reveal>
+    <h1 id="hero-h"><span class="nowrap">Know your stock.</span> <span class="nowrap">Track your money.</span> <span class="hl nowrap">Grow your business.</span></h1>
+    <p class="tagline">Smarter. Faster. Better.</p>
+    <p class="lead">Joryka brings sales, inventory and customer credit together in one system for retail and wholesale businesses.</p>
+    <div class="cta-row">
+      <a class="btn btn-lg" href="#contact" data-track="hero_demo_cta_click">Request a Demo<svg><use href="#i-arrow"/></svg></a>
+      <a class="btn btn-lg btn-soft js-whatsapp" href="#contact" data-track="whatsapp_click"><svg class="wa"><use href="#i-msg"/></svg>Chat on WhatsApp</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="play" id="play" data-active="pos" data-net="online">
+      <svg class="wire" aria-hidden="true"><path/></svg>
+      <div class="tiles" role="tablist" aria-label="Try a feature">
+        <button type="button" class="tile side-l" role="tab" id="t-pos" aria-controls="stage" aria-selected="true" data-f="pos" style="--c:#2E4AFF"><span class="tile-ico"><svg><use href="#i-cart"/></svg></span><span class="tile-label">Point of Sale</span></button>
+        <button type="button" class="tile side-l" role="tab" id="t-stock" aria-controls="stage" aria-selected="false" tabindex="-1" data-f="stock" style="--c:#AD46FF"><span class="tile-ico"><svg><use href="#i-package"/></svg></span><span class="tile-label">Inventory</span></button>
+        <button type="button" class="tile side-l" role="tab" id="t-credit" aria-controls="stage" aria-selected="false" tabindex="-1" data-f="credit" style="--c:#FE9A00"><span class="tile-ico"><svg><use href="#i-book"/></svg></span><span class="tile-label">Customers &amp; Credit</span></button>
+        <button type="button" class="tile" role="tab" id="t-docs" aria-controls="stage" aria-selected="false" tabindex="-1" data-f="docs" style="--c:#00B8DB"><span class="tile-ico"><svg><use href="#i-file"/></svg></span><span class="tile-label">Quotes &amp; Invoices</span></button>
+        <button type="button" class="tile" role="tab" id="t-reports" aria-controls="stage" aria-selected="false" tabindex="-1" data-f="reports" style="--c:#FF6900"><span class="tile-ico"><svg><use href="#i-bars"/></svg></span><span class="tile-label">Reports</span></button>
+        <button type="button" class="tile" role="tab" id="t-ai" aria-controls="stage" aria-selected="false" tabindex="-1" data-f="ai" style="--c:#11102D"><span class="tile-ico"><svg><use href="#i-spark"/></svg></span><span class="tile-label">Joryka AI</span></button>
+      </div>
+
+      <div class="stage" id="stage" role="tabpanel" aria-labelledby="t-pos">
+        <nav class="rail" aria-label="Joryka menu (sample)">
+          <button type="button" class="menu-btn" data-act="menu" aria-expanded="false" aria-controls="rail-menu" aria-label="Open menu"><svg aria-hidden="true"><use href="#i-menu"/></svg></button>
+          <span class="rail-logo"><img src="assets/logo-icon.svg" alt="" width="28" height="28"><img class="rail-word" src="assets/logo-dark.svg" alt="Joryka" width="96" height="20"></span>
+          <div class="rail-menu" id="rail-menu">
+            <p class="drawer-h"><img src="assets/logo-dark.svg" alt="" width="96" height="20"><button type="button" class="drawer-x" data-act="menu" aria-label="Close menu"><svg aria-hidden="true"><use href="#i-x"/></svg></button></p>
+            <ul class="rail-list"></ul>
+          </div>
+          <button type="button" class="net" id="net" role="switch" aria-checked="true" aria-label="Network connection"><svg class="ic-on" aria-hidden="true"><use href="#i-wifi"/></svg><svg class="ic-off" aria-hidden="true"><use href="#i-wifi-off"/></svg><span class="net-label">Online</span></button>
+          <button type="button" class="app-x" data-act="closeapp"><svg aria-hidden="true"><use href="#i-x"/></svg>Close</button>
+        </nav>
+        <div class="app">
+          <div class="banner" aria-live="polite"></div>
+          <div class="app-body" tabindex="-1"></div>
+        </div>
+        <div class="layer" hidden></div>
+        <button type="button" class="try-app" data-open="stage"><span class="try-pill">Try the app<svg aria-hidden="true"><use href="#i-expand"/></svg></span><span class="try-note">Opens full screen</span></button>
+      </div>
+      <button type="button" class="callout" data-act="net"><svg aria-hidden="true"><use href="#i-wifi-off"/></svg><span><b>Works offline.</b> <span class="callout-text">Switch the network off here and keep selling.</span></span></button>
+    </div>
+  </div>
+  <p class="toast" role="status" aria-live="polite"></p>
+</section>
+
+<section class="strip" aria-labelledby="strip-label">
+  <div class="strip-in">
+    <p class="strip-label" id="strip-label">One system for</p>
+    <div class="marquee">
+      <ul class="track">
+        <li><svg><use href="#i-grid"/></svg>Dashboard</li>
+        <li><svg><use href="#i-cart"/></svg>Point of Sale</li>
+        <li><svg><use href="#i-package"/></svg>Inventory</li>
+        <li><svg><use href="#i-users"/></svg>Customers</li>
+        <li><svg><use href="#i-file"/></svg>Quotations</li>
+        <li><svg><use href="#i-invoice"/></svg>Invoices</li>
+        <li><svg><use href="#i-book"/></svg>Money Record</li>
+        <li><svg><use href="#i-bars"/></svg>Reports</li>
+        <li><svg><use href="#i-spark"/></svg>Joryka AI</li>
+        <li><svg><use href="#i-shield"/></svg>Activity History</li>
+        <li><svg><use href="#i-warehouse"/></svg>Warehouses</li>
+        <li><svg><use href="#i-user"/></svg>User Management</li>
+        <li><svg><use href="#i-cog"/></svg>Settings</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="section tour" id="tour" aria-labelledby="tour-h">
+  <div class="container">
+    <div class="center-head" data-reveal>
+      <p class="eyebrow">Product tour</p>
+      <h2 id="tour-h">See Joryka run a shop in <span>just over a minute</span></h2>
+      <p>Sales and part-payments, selling offline, stock, credit, quotes and Joryka AI, in the same sample shop as the playground above.</p>
+    </div>
+    <figure class="tour-frame" data-reveal>
+      <video controls playsinline preload="none" poster="assets/joryka-tour-poster.jpg" width="1920" height="1080" aria-label="Joryka product tour, 77 seconds, with narration">
+        <source src="assets/joryka-tour.mp4" type="video/mp4">
+        <track kind="captions" src="assets/joryka-tour.vtt" srclang="en" label="English">
+      </video>
+      <button type="button" class="tour-play" data-track="tour_play_click" hidden><span class="tour-pill"><span class="tour-ico"><svg aria-hidden="true"><use href="#i-play"/></svg></span><span class="tour-txt">Watch the tour<small>1:17 · captions available</small></span></span></button>
+    </figure>
+  </div>
+</section>
+
+<section class="section paper" id="features" aria-labelledby="features-h">
+  <div class="container">
+    <div class="split-head" data-reveal>
+      <div><p class="eyebrow">Features</p><h2 id="features-h">Everything your counter needs, <span>in one place</span></h2></div>
+      <p>From the first sale of the morning to the last balance at night: selling, stock, credit, paperwork and reports share one set of records.</p>
+    </div>
+    <div class="fgrid" data-reveal>
+      <article class="fcard f-4">
+        <span class="ftile" style="--c:#2E4AFF" aria-hidden="true"><svg><use href="#i-cart"/></svg></span>
+        <h3>Point of Sale</h3>
+        <p>Sell by the unit or the carton, scan barcodes, and take cash, transfer, part-payment or credit. Receipts go out on WhatsApp or print.</p>
+        <div class="mock mock-pos" aria-hidden="true">
+          <div class="m-prod"><b>Instant Noodles 70g</b><i>NDL-070</i><span class="m-st">3 ctn · 11 units <em>47</em></span><span class="m-pr"><span>650<small>₦ / unit</small></span><span class="c">7,800<small>₦ / ctn</small></span></span></div>
+          <div class="m-prod lv-low"><b>Sugar 500g</b><i>SGR-500</i><span class="m-st">1 ctn · 2 units <em>14</em></span><span class="m-pr"><span>900<small>₦ / unit</small></span><span class="c">10,800<small>₦ / ctn</small></span></span></div>
+          <div class="m-prod"><b>Vegetable Oil 1L</b><i>OIL-001</i><span class="m-st">7 ctn · 11 units <em>95</em></span><span class="m-pr"><span>2,800<small>₦ / unit</small></span><span class="c">33,600<small>₦ / ctn</small></span></span></div>
+          <div class="m-cart"><b><svg><use href="#i-cart"/></svg>Cart</b><span>Instant Noodles 70g × 4<i>₦2,600</i></span><span>Sugar 500g × 2<i>₦1,800</i></span><span class="t">Total<i>₦4,400</i></span><span class="m-btn">Proceed to Payment</span></div>
+        </div>
+        <button type="button" class="try" data-try="pos">Try it in the playground<svg><use href="#i-arrow"/></svg></button>
+      </article>
+      <article class="fcard">
+        <span class="ftile" style="--c:#AD46FF" aria-hidden="true"><svg><use href="#i-package"/></svg></span>
+        <h3>Inventory &amp; warehouses</h3>
+        <p>Stock goes down with every sale, in each warehouse, with low-stock and expiry flags before a shelf runs empty.</p>
+        <div class="mock" aria-hidden="true">
+          <span class="m-row"><span class="m-ico"><svg><use href="#i-package"/></svg></span><span><b>Instant Noodles 70g</b><i>197 units · 16 ctn + 5 u</i></span><em class="badge ok">In Stock</em></span>
+          <span class="m-row"><span class="m-ico"><svg><use href="#i-package"/></svg></span><span><b>Sugar 500g</b><i>22 units · 1 ctn + 10 u</i></span><em class="badge low">Low Stock</em></span>
+          <span class="m-row"><span class="m-ico"><svg><use href="#i-package"/></svg></span><span><b>Tin Tomato 400g</b><i>0 units</i></span><em class="badge out">Out of Stock</em></span>
+        </div>
+        <button type="button" class="try" data-try="stock">Try it in the playground<svg><use href="#i-arrow"/></svg></button>
+      </article>
+      <article class="fcard">
+        <span class="ftile" style="--c:#FE9A00" aria-hidden="true"><svg><use href="#i-book"/></svg></span>
+        <h3>Customers &amp; credit</h3>
+        <p>See who owes what, record repayments as they come in, and keep every sale and payment in one money record.</p>
+        <div class="mock" aria-hidden="true">
+          <span class="m-row"><span class="m-av" style="--c:#D4183D">A</span><span><b>Aisha Bello</b><i>0803 555 0142</i></span><em class="m-owe">₦15,000<small>Still Owing</small></em><em class="m-btn-pay">Pay</em></span>
+          <span class="m-row"><span class="m-av" style="--c:#D4183D">T</span><span><b>Tunde Adeyemi</b><i>0705 555 0123</i></span><em class="m-owe">₦7,500<small>Still Owing</small></em><em class="m-btn-pay">Pay</em></span>
+        </div>
+        <button type="button" class="try" data-try="credit">Try it in the playground<svg><use href="#i-arrow"/></svg></button>
+      </article>
+      <article class="fcard">
+        <span class="ftile" style="--c:#00B8DB" aria-hidden="true"><svg><use href="#i-file"/></svg></span>
+        <h3>Quotations &amp; invoices</h3>
+        <p>Send a quotation, turn it into an invoice when the customer agrees, then track delivery and every payment against it.</p>
+        <div class="mock" aria-hidden="true">
+          <span class="m-row"><span><b class="mono">QUO-0011 <em class="badge info">Sent</em></b><i>Tunde Adeyemi</i></span><em>₦67,200</em></span>
+          <span class="m-row"><span><b class="mono">INV-0240 <em class="badge ok">Fulfilled</em> <em class="badge ok">Paid</em></b><i>Ngozi Eze</i></span><em>₦54,000</em></span>
+          <span class="m-row"><span><b class="mono">INV-0238 <em class="badge ok">Fulfilled</em> <em class="badge ok">Paid</em></b><i>Chinedu Okafor</i></span><em>₦41,400</em></span>
+        </div>
+        <button type="button" class="try" data-try="docs">Try it in the playground<svg><use href="#i-arrow"/></svg></button>
+      </article>
+      <article class="fcard">
+        <span class="ftile" style="--c:#FF6900" aria-hidden="true"><svg><use href="#i-bars"/></svg></span>
+        <h3>Reports</h3>
+        <p>Revenue, profit and cash collected at a glance, with daily sales, receipts, stock and reconciliation reports to export.</p>
+        <div class="mock mock-rep" aria-hidden="true">
+          <span class="m-kpi"><i>Total Revenue</i><b>₦453,000</b></span>
+          <span class="m-kpi"><i>Gross Profit</i><b class="pos">₦69,240</b></span>
+          <span class="m-bars"><i style="--h:60%"></i><i style="--h:67%"></i><i style="--h:84%"></i><i style="--h:100%"></i><i style="--h:23%"></i><i style="--h:63%"></i><i style="--h:70%"></i></span>
+        </div>
+        <button type="button" class="try" data-try="reports">Try it in the playground<svg><use href="#i-arrow"/></svg></button>
+      </article>
+      <article class="fcard f-4 f-ai">
+        <div class="f-ai-copy">
+          <span class="ftile" style="--c:#11102D" aria-hidden="true"><svg><use href="#i-spark"/></svg></span>
+          <h3>Joryka AI</h3>
+          <p>A daily brief of what needs your attention, and plain answers to questions about your sales, stock and customers. Each answer shows how it was worked out, and when your records can’t explain something, it says so.</p>
+          <button type="button" class="try" data-try="ai">Try it in the playground<svg><use href="#i-arrow"/></svg></button>
+        </div>
+        <div class="mock mock-chat" aria-hidden="true">
+          <span class="m-att"><em class="badge out">Urgent</em>Tin Tomato 400g is out of stock in both warehouses.</span>
+          <span class="m-att"><em class="badge low">Watch</em>Tunde Adeyemi’s ₦7,500 is 25 days overdue.</span>
+          <span class="b-me">Why did sales change?</span>
+          <span class="b-ai"><b>Sales are 5.6% below last week.</b><i>Vegetable Oil running out at the Secondary Warehouse explains about ₦14,000 of the drop. The rest, the data doesn’t show why.</i><small><svg><use href="#i-info"/></svg>Based on 159 sales, 21–27 Oct · Written by AI</small></span>
+        </div>
+      </article>
+      <article class="fcard">
+        <span class="ftile" style="--c:#00A63E" aria-hidden="true"><svg><use href="#i-wifi-off"/></svg></span>
+        <h3>Works offline</h3>
+        <p>No network? Keep selling. Sales are saved on the device and sync on their own when you’re back online.</p>
+        <div class="mock" aria-hidden="true">
+          <span class="m-banner off"><svg><use href="#i-wifi-off"/></svg><span><b>You’re offline</b><i>Your changes are saved locally.</i></span><em>2 pending</em></span>
+          <span class="m-banner sync"><svg><use href="#i-refresh"/></svg><span><b>Syncing changes…</b><i>Uploading 2 pending transactions.</i></span></span>
+        </div>
+        <button type="button" class="try" data-try="offline">Try it in the playground<svg><use href="#i-arrow"/></svg></button>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section navy" id="offline" aria-labelledby="offline-h">
+  <div class="container offline-grid">
+    <div data-reveal>
+      <p class="eyebrow">How offline works</p>
+      <h2 id="offline-h">When the network drops, the counter <span>keeps going</span>.</h2>
+      <p class="sub">Joryka is designed offline-first, so the everyday work of your shop doesn’t have to wait for a signal.</p>
+      <ul class="points">
+        <li><span><svg><use href="#i-users"/></svg></span><p><b>Keep serving customers</b>Record sales at the counter, even when connectivity is unreliable.</p></li>
+        <li><span><svg><use href="#i-book"/></svg></span><p><b>Keep your records together</b>Sales, stock and customer credit stay in one system — not scattered across notebooks.</p></li>
+        <li><span><svg><use href="#i-wifi-off"/></svg></span><p><b>Always know your status</b>A clear connection indicator shows whether you are online, and how many changes are waiting to sync.</p></li>
+      </ul>
+      <a class="btn btn-lg" href="#contact" data-track="offline_demo_cta_click">Request a Demo<svg><use href="#i-arrow"/></svg></a>
+    </div>
+    <div class="off-visual" aria-hidden="true" data-reveal>
+      <div class="o-scene">
+        <div class="o-win">
+          <span class="o-rail"><i></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i></span>
+          <span class="o-grid"><span class="o-pc" style="--s:#00C950"><b>Vegetable Oil 1L</b><i>OIL-001</i><em><u>2,800.00</u><u>33,600.00</u></em></span><span class="o-pc" style="--s:#F9B80A"><b>Sugar 500g</b><i>SGR-500</i><em><u>900.00</u><u>10,800.00</u></em></span><span class="o-pc" style="--s:#00C950"><b>Instant Noodles 70g</b><i>NDL-070</i><em><u>650.00</u><u>7,800.00</u></em></span><span class="o-pc" style="--s:#00C950"><b>Evaporated Milk 160g</b><i>EVM-160</i><em><u>450.00</u><u>5,400.00</u></em></span></span>
+        </div>
+        <div class="o-cart" data-net="offline">
+          <p class="o-banner"><svg><use href="#i-wifi-off"/></svg><span><b>You’re offline</b><i>Your changes are saved locally and will sync once you’re back online.</i></span><em>3 pending</em></p>
+          <p class="o-head"><b><svg><use href="#i-cart"/></svg>Cart</b><span class="o-count">3</span></p>
+          <p class="o-cust"><svg><use href="#i-user"/></svg>Walk-in Customer<svg><use href="#i-down"/></svg></p>
+          <div class="o-lines">
+            <p class="o-line"><span><b>Vegetable Oil 1L</b><i>2 × ₦2,800</i></span><b>₦5,600</b></p>
+            <p class="o-line"><span><b>Instant Noodles 70g</b><i>5 × ₦650</i></span><b>₦3,250</b></p>
+            <p class="o-line"><span><b>Sugar 500g</b><i>1 × ₦900</i></span><b>₦900</b></p>
+          </div>
+          <p class="o-sub"><span>Subtotal</span><span class="o-subv">₦9,750</span></p>
+          <p class="o-tot"><span>Total</span><b class="o-totv">₦9,750</b></p>
+          <p class="o-pay"><svg><use href="#i-check"/></svg>Proceed to Payment</p>
+        </div>
+        <p class="o-net"><svg><use href="#i-wifi-off"/></svg><b>Offline</b></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="pricing" aria-labelledby="pricing-h">
+  <div class="container">
+    <div class="center-head" data-reveal>
+      <p class="eyebrow">Launch pricing</p>
+      <h2 id="pricing-h">Simple plans, <span>tailored to you</span></h2>
+      <p>We’re finalising plans for launch. Request a demo and we’ll walk you through what fits your business.</p>
+    </div>
+    <div class="plans" data-reveal>
+      <article class="plan">
+        <div class="plan-top"><h3 class="plan-name">Starter</h3></div>
+        <p class="plan-for">For single-counter shops getting organised.</p>
+        <p class="plan-price"><b aria-hidden="true">₦ —</b><span>Price announced at launch</span></p>
+        <ul><li><svg><use href="#i-check"/></svg>Point of Sale</li><li><svg><use href="#i-check"/></svg>Inventory</li><li><svg><use href="#i-check"/></svg>Customers &amp; credit</li></ul>
+        <a class="btn btn-ink btn-block" href="#contact">Request a Demo</a>
+        <p class="plan-note">Placeholder plan · details at launch</p>
+      </article>
+      <article class="plan plan-hi">
+        <div class="plan-top"><h3 class="plan-name">Growth</h3><p class="plan-flag">Recommended</p></div>
+        <p class="plan-for">For busy stores with a few staff members.</p>
+        <p class="plan-price"><b aria-hidden="true">₦ —</b><span>Price announced at launch</span></p>
+        <ul><li><svg><use href="#i-check"/></svg>Everything in Starter</li><li><svg><use href="#i-check"/></svg>Multiple staff accounts</li><li><svg><use href="#i-check"/></svg>Reports</li></ul>
+        <a class="btn btn-block" href="#contact">Request a Demo</a>
+        <p class="plan-note">Placeholder plan · details at launch</p>
+      </article>
+      <article class="plan">
+        <div class="plan-top"><h3 class="plan-name">Business</h3></div>
+        <p class="plan-for">For wholesalers with more than one warehouse.</p>
+        <p class="plan-price"><b aria-hidden="true">₦ —</b><span>Price announced at launch</span></p>
+        <ul><li><svg><use href="#i-check"/></svg>Everything in Growth</li><li><svg><use href="#i-check"/></svg>Multiple warehouses</li><li><svg><use href="#i-check"/></svg>Quotations &amp; invoices</li></ul>
+        <a class="btn btn-ink btn-block" href="#contact">Request a Demo</a>
+        <p class="plan-note">Placeholder plan · details at launch</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section paper" id="contact" aria-labelledby="contact-h">
+  <div class="container contact-grid">
+    <div data-reveal>
+      <p class="eyebrow">Request a demo</p>
+      <h2 id="contact-h">See how <span>Joryka</span> fits your shop</h2>
+      <p class="sub">Tell us a little about your business and we’ll arrange a walkthrough of sales, stock and customer credit in Joryka.</p>
+      <ul class="checks">
+        <li><svg><use href="#i-check"/></svg>See sales, stock and credit in action</li>
+        <li><svg><use href="#i-check"/></svg>Ask about offline use, staff and setup</li>
+        <li><svg><use href="#i-check"/></svg>No account or payment needed to ask</li>
+      </ul>
+      <div class="wa-line">
+        <p class="wa-q">Rather chat?</p>
+        <a class="wa-cta js-whatsapp" href="#contact" data-track="whatsapp_click">Message the Joryka team on <span class="nowrap">WhatsApp<svg aria-hidden="true"><use href="#i-arrow"/></svg></span></a>
+      </div>
+    </div>
+    <form class="form-card" id="demo-form" novalidate data-reveal>
+      <div class="form-head"><h3>Request a Demo</h3><p>All fields are required unless marked optional.</p></div>
+      <div class="row2">
+        <div class="field"><label for="f-name">Full name</label><input id="f-name" name="name" autocomplete="name" required placeholder="e.g. Chinedu Okafor"><p class="err" id="e-name" hidden>Enter your name.</p></div>
+        <div class="field"><label for="f-biz">Business name</label><input id="f-biz" name="business" autocomplete="organization" required placeholder="e.g. Ngozi Provisions"><p class="err" id="e-biz" hidden>Enter your business name.</p></div>
+      </div>
+      <div class="field"><label for="f-contact">Phone number or email</label><input id="f-contact" name="contact" autocomplete="tel" required placeholder="e.g. 0803 555 0142"><p class="err" id="e-contact" hidden>Enter a phone number or an email address we can reach you on.</p></div>
+      <div class="field"><label for="f-msg">Message <span>(optional)</span></label><textarea id="f-msg" name="message" rows="3" placeholder="Tell us about your shop"></textarea></div>
+      <p class="fine">We’ll only use these details to arrange your demo. See our <a href="#privacy">Privacy notice</a>.</p>
+      <button class="btn btn-lg btn-block submit" type="submit">Request a Demo</button>
+      <p class="form-status" role="status" aria-live="polite"></p>
+    </form>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <div class="container foot">
+    <div class="foot-brand"><img src="assets/logo-light.svg" alt="Joryka" width="301" height="64"><p class="foot-tag">Smarter. Faster. Better.</p><p>Offline-first POS, inventory and credit management for retailers and wholesalers in Nigeria.</p></div>
+    <nav aria-label="Product"><b>Product</b><a href="#features">Features</a><a href="#offline">How offline works</a><a href="#pricing">Pricing</a></nav>
+    <nav aria-label="Get in touch"><b>Get in touch</b><a href="#contact">Request a Demo</a><a href="#contact" class="js-whatsapp">Chat on WhatsApp</a><a href="#" class="js-login">Login</a></nav>
+    <nav aria-label="Legal" id="privacy"><b>Legal</b><a href="#privacy">Privacy notice</a></nav>
+  </div>
+  <div class="container foot-base"><span>© 2026 Joryka. All rights reserved.</span><span>Built for retailers and wholesalers in Nigeria · Figures in the playground are sample data</span></div>
+</footer>
+
+<script src="app.js" defer></script>
+</body>
+</html>
