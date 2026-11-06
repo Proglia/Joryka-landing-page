@@ -37,7 +37,7 @@ Open `app.js` and fill in the `CONFIG` block at the top:
 ```js
 const CONFIG = {
   loginUrl: '',        // the Joryka app URL, used by every "Login" link
-  whatsappNumber: '',  // international format, digits only, e.g. '2349022310523'
+  whatsappNumber: '',  // international format, digits only, e.g. '2348000000000'
   whatsappText: 'Hello Joryka, I would like to know more about the POS for my business.',
   demoEndpoint: '',    // form / CRM endpoint that accepts a JSON POST
 };
