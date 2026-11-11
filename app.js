@@ -2,10 +2,18 @@
 
 // Launch blockers (PRD §30): fill these before the page goes public.
 const CONFIG = {
-  loginUrl: '',        // canonical Joryka app URL, e.g. 'https://app.joryka.com'
-  whatsappNumber: '',  // official business number in international format, digits only, e.g. '2348000000000'
+  // Login: your local Joryka app when the page runs on localhost, otherwise the dev app.
+  // For launch, replace the dev URL with the production app URL.
+  loginUrl: ['localhost', '127.0.0.1'].includes(location.hostname)
+    ? 'http://localhost:5173/login'
+    : 'https://dev.joryka.com/login',
+  whatsappNumber: '2349022310523',  // Client's official Nigerian WhatsApp number.
   whatsappText: 'Hello Joryka, I would like to know more about the POS for my business.',
-  demoEndpoint: '',    // approved form / CRM endpoint that accepts a JSON POST
+  // Demo form: your local Joryka backend when the page runs on localhost, otherwise the dev API.
+  // For launch, replace the dev API URL with the production API URL.
+  demoEndpoint: ['localhost', '127.0.0.1'].includes(location.hostname)
+    ? 'http://localhost:3001/api/demo-requests'
+    : 'https://dev-api.joryka.com/api/demo-requests',
 };
 
 document.documentElement.classList.add('js');
@@ -36,6 +44,47 @@ document.addEventListener('click', (e) => {
   const t = e.target.closest('[data-track]');
   if (t && window.dataLayer) window.dataLayer.push({ event: t.dataset.track, placement: t.closest('section, header, footer')?.id || 'page' });
 });
+
+/* ---------------------------------------------------------------- mobile menu (≤ 1100px) */
+// ☰ opens a panel under the header; ✕, Escape, tapping outside, tabbing out of the header,
+// choosing a link or widening the window past 1100px close it. The page doesn't scroll while
+// it's open. Focus goes to the first link on open and back to the ☰ button on close.
+(function mobileMenu() {
+  const header = $('.site-header');
+  const toggle = $('.menu-toggle', header);
+  const menu = $('#mobile-menu');
+  if (!header || !toggle || !menu) return;
+  const icon = $('use', toggle);
+  const desktop = matchMedia('(min-width: 1101px)');
+
+  const isOpen = () => !menu.hidden;
+  function open() {
+    menu.hidden = false;
+    toggle.setAttribute('aria-expanded', 'true');
+    toggle.setAttribute('aria-label', 'Close menu');
+    icon.setAttribute('href', '#i-x');
+    document.documentElement.style.overflow = 'hidden';
+    $('a', menu)?.focus();
+    window.dataLayer?.push({ event: 'mobile_menu_open' });
+  }
+  function close({ restoreFocus = true } = {}) {
+    if (!isOpen()) return;
+    menu.hidden = true;
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-label', 'Open menu');
+    icon.setAttribute('href', '#i-menu');
+    document.documentElement.style.overflow = '';
+    if (restoreFocus) toggle.focus({ preventScroll: true });
+  }
+
+  toggle.addEventListener('click', () => (isOpen() ? close() : open()));
+  // A link closes the menu first (unlocking the scroll) so its normal jump to the section works.
+  menu.addEventListener('click', (e) => { if (e.target.closest('a')) close(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isOpen()) close(); });
+  document.addEventListener('pointerdown', (e) => { if (isOpen() && !header.contains(e.target)) close({ restoreFocus: false }); });
+  document.addEventListener('focusin', (e) => { if (isOpen() && !header.contains(e.target)) close({ restoreFocus: false }); });
+  desktop.addEventListener('change', (e) => { if (e.matches) close({ restoreFocus: false }); });
+})();
 
 /* ---------------------------------------------------------------- entrances */
 const revealables = $$('[data-reveal]');
@@ -1133,21 +1182,60 @@ requestAnimationFrame(drawWire);
 const form = $('#demo-form');
 const status = $('.form-status', form);
 const submit = $('.submit', form);
+// Same rules as the backend's normalizeContact (joryka-backend/src/services/demoRequest/contact.js),
+// so the form never sends a contact the server will reject. Keep the two IDENTICAL.
+// Deliberately lenient (we don't want to lose leads). Valid: an email; or a phone made of digits,
+// spaces, - . ( ) with an optional leading +, with 7–15 digits — after dropping a leading 00, and
+// with an 11-digit local number starting with 0 counted as 234…. Letters → invalid.
+function isValidContact(raw) {
+  const value = raw.trim();
+  if (!value) return false;
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return true;
+  if (!/^\+?[\d\s\-.()]+$/.test(value)) return false;
+  let digits = value.replace(/\D/g, '');
+  if (!value.startsWith('+')) {
+    if (digits.startsWith('00')) digits = digits.slice(2);
+    else if (digits.length === 11 && digits.startsWith('0')) digits = `234${digits.slice(1)}`;
+    // 13 digits starting with 234 = Nigerian number without "+" (international on the backend;
+    // kept here so both copies of the rule stay identical — it doesn't change validity).
+    else if (digits.length === 13 && digits.startsWith('234')) digits = digits.slice(0);
+  }
+  return digits.length >= 7 && digits.length <= 15;
+}
 const rules = [
   ['f-name', 'e-name', (v) => v.trim().length >= 2],
   ['f-biz', 'e-biz', (v) => v.trim().length >= 2],
-  ['f-contact', 'e-contact', (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) || v.replace(/[^\d]/g, '').length >= 10],
+  ['f-contact', 'e-contact', isValidContact],
 ];
-function check(id, errId, ok) {
+// Backend field name → [input id, error id], for showing a 400's field errors in place.
+const SERVER_FIELDS = {
+  name: ['f-name', 'e-name'],
+  business: ['f-biz', 'e-biz'],
+  contact: ['f-contact', 'e-contact'],
+  message: ['f-msg', 'e-msg'],
+};
+// Remember each error's own text, so a server message never sticks around.
+Object.values(SERVER_FIELDS).forEach(([, errId]) => {
+  const err = document.getElementById(errId);
+  err.dataset.text = err.textContent;
+});
+function setFieldError(id, errId, message) {
   const input = document.getElementById(id);
   const err = document.getElementById(errId);
-  const good = ok(input.value);
-  input.setAttribute('aria-invalid', String(!good));
-  if (good) input.removeAttribute('aria-describedby'); else input.setAttribute('aria-describedby', errId);
-  err.hidden = good;
+  const bad = message !== null;
+  input.setAttribute('aria-invalid', String(bad));
+  if (bad) input.setAttribute('aria-describedby', errId); else input.removeAttribute('aria-describedby');
+  if (bad) err.textContent = message;
+  err.hidden = !bad;
+}
+function check(id, errId, ok) {
+  const good = ok(document.getElementById(id).value);
+  setFieldError(id, errId, good ? null : document.getElementById(errId).dataset.text);
   return good;
 }
 rules.forEach(([id, errId, ok]) => document.getElementById(id).addEventListener('blur', (e) => { if (e.target.value) check(id, errId, ok); }));
+// The message has no browser-side rule; clear a server error on it as soon as it's edited.
+document.getElementById('f-msg').addEventListener('input', () => setFieldError('f-msg', 'e-msg', null));
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   const results = rules.map((r) => check(...r));
@@ -1163,8 +1251,32 @@ form.addEventListener('submit', async (e) => {
   }
   submit.disabled = true;
   submit.textContent = 'Sending…';
+  // Give up after 15 seconds so a slow server shows the error message instead of "Sending…" forever.
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
   try {
-    const res = await fetch(CONFIG.demoEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...data, source_page: location.pathname, created_at: new Date().toISOString() }) });
+    const res = await fetch(CONFIG.demoEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...data, source_page: location.pathname, created_at: new Date().toISOString() }), signal: controller.signal });
+    // 400 with field errors → show each one under its field (first message per field) and keep
+    // what the visitor typed. Anything else that isn't OK falls through to the generic error.
+    if (res.status === 400) {
+      const body = await res.json().catch(() => null);
+      const fieldErrors = (Array.isArray(body?.errors) ? body.errors : [])
+        .filter((er) => SERVER_FIELDS[er.path ?? er.param] && typeof er.msg === 'string' && er.msg.trim())
+        // Backend messages have no full stop; add one so they read like the form's own errors.
+        .map((er) => ({ field: er.path ?? er.param, msg: /[.!?]$/.test(er.msg.trim()) ? er.msg.trim() : `${er.msg.trim()}.` }));
+      if (fieldErrors.length) {
+        const shown = new Set();
+        fieldErrors.forEach(({ field, msg }) => {
+          if (shown.has(field)) return;
+          shown.add(field);
+          setFieldError(...SERVER_FIELDS[field], msg);
+        });
+        document.getElementById(SERVER_FIELDS[fieldErrors[0].field][0]).focus();
+        status.textContent = 'Check the highlighted field and try again.';
+        window.dataLayer?.push({ event: 'demo_form_submit_error', error_category: 'validation' });
+        return;
+      }
+    }
     if (!res.ok) throw new Error(res.status);
     form.reset();
     status.textContent = 'Thank you. Your demo request has been sent.';
@@ -1173,6 +1285,7 @@ form.addEventListener('submit', async (e) => {
     status.innerHTML = 'We couldn’t send your request. Please try again' + (CONFIG.whatsappNumber ? ` or <a href="https://wa.me/${CONFIG.whatsappNumber}">contact us on WhatsApp</a>.` : '.');
     window.dataLayer?.push({ event: 'demo_form_submit_error', error_category: 'network' });
   } finally {
+    clearTimeout(timeout);
     submit.disabled = false;
     submit.textContent = 'Request a Demo';
   }

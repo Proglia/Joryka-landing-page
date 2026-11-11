@@ -97,6 +97,8 @@ svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width:
 .nav a:hover { color: var(--blue); }
 .bar-actions { display: flex; align-items: center; gap: 4px; }
 .bar-actions .btn:last-child { margin-left: 12px; }
+/* mobile menu (≤ 1100px only; see the max-width: 1100px block) */
+.menu-toggle, .mobile-menu { display: none; }
 
 /* hero */
 .hero { position: relative; padding: 80px 0 40px; background: linear-gradient(180deg, var(--paper), var(--white) 70%); }
@@ -835,6 +837,8 @@ svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width:
 .form-head p { font-size: 14px; color: var(--muted); }
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .field { display: grid; gap: 8px; }
+/* Spam trap: moved off-screen (not display:none, which some bots skip). People never see or reach it. */
+.hp { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 .field label { font-size: 14px; font-weight: 600; }
 .field label span { font-weight: 400; color: var(--muted); }
 .field input, .field textarea, .select select { width: 100%; border: 1px solid var(--line); border-radius: var(--r-ctl); background: var(--white); color: var(--ink); font: 400 16px/1.4 var(--font); transition: border-color 160ms ease, box-shadow 160ms ease; }
@@ -883,7 +887,25 @@ svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width:
 }
 @media (max-width: 1100px) {
   .nav, .wa-link { display: none; }
+  /* header: logo left; "Request a Demo" + ☰ right. Login moves into the menu. */
+  .bar-actions { margin-left: auto; }
+  .bar-actions .js-login { display: none; }
+  .bar-actions .btn:last-child { margin-left: 0; }
+  .bar { gap: 8px; }
+  .menu-toggle { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin-right: -10px; padding: 0; border: 0; border-radius: var(--r-ctl); background: transparent; color: var(--ink); cursor: pointer; }
+  .menu-toggle:hover { background: var(--navy-100); }
+  .menu-toggle svg { width: 24px; height: 24px; }
+  /* open menu: a panel under the header, full-width rows with thin dividers */
+  .mobile-menu:not([hidden]) { display: block; position: absolute; left: 0; right: 0; top: 100%; max-height: calc(100vh - 100%); max-height: calc(100dvh - 100%); overflow-y: auto; overscroll-behavior: contain; background: var(--white); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); box-shadow: var(--shadow-card); animation: mm-in 200ms var(--ease); }
+  .mobile-menu ul { padding-top: 8px; padding-bottom: 16px; }
+  .mobile-menu li { border-bottom: 1px solid var(--line); }
+  .mobile-menu a { display: flex; align-items: center; min-height: 52px; font-size: 17px; font-weight: 500; text-decoration: none; transition: color 160ms ease; }
+  .mobile-menu a:hover { color: var(--blue); }
+  .mobile-menu .mm-login { border-bottom: 0; padding-top: 12px; }
+  .mobile-menu .mm-login a { justify-content: center; gap: 10px; font-weight: 600; }
+  .mobile-menu .mm-login svg { width: 20px; height: 20px; }
 }
+@keyframes mm-in { from { opacity: 0; transform: translateY(-8px); } }
 @media (max-width: 1199px) {
   :root { --sec-pad: 40px; --head-gap: 36px; }
   .play { height: auto; margin-top: 48px; }
@@ -1094,4 +1116,5 @@ svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width:
   .track[aria-hidden="true"] { display: none; }
   .marquee { -webkit-mask-image: none; mask-image: none; }
   .btn, .toast, .o-scene, .tile-ico, .tile-label, .pc-prices button, .net, .try svg, .ab, .rail-list button::after { transition: none; }
+  .mobile-menu:not([hidden]) { animation: none; }
 }
