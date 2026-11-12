@@ -39,52 +39,26 @@ $$('.js-whatsapp').forEach((a) => {
   a.rel = 'noopener';
 });
 
+/* ---------------------------------------------------------------- small-screen menu */
+{
+  const btn = $(".nav-toggle"), menu = $("#site-menu");
+  const set = (open) => {
+    menu.hidden = !open;
+    btn.setAttribute("aria-expanded", String(open));
+    btn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+  };
+  btn.addEventListener("click", () => set(menu.hidden));
+  menu.addEventListener("click", (e) => { if (e.target.closest("a")) set(false); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !menu.hidden) { set(false); btn.focus(); } });
+  document.addEventListener("click", (e) => { if (!menu.hidden && !e.target.closest(".site-header")) set(false); });
+  matchMedia("(min-width: 1101px)").addEventListener("change", (m) => { if (m.matches) set(false); });
+}
+
 /* ---------------------------------------------------------------- analytics hook (no personal data) */
 document.addEventListener('click', (e) => {
   const t = e.target.closest('[data-track]');
   if (t && window.dataLayer) window.dataLayer.push({ event: t.dataset.track, placement: t.closest('section, header, footer')?.id || 'page' });
 });
-
-/* ---------------------------------------------------------------- mobile menu (≤ 1100px) */
-// ☰ opens a panel under the header; ✕, Escape, tapping outside, tabbing out of the header,
-// choosing a link or widening the window past 1100px close it. The page doesn't scroll while
-// it's open. Focus goes to the first link on open and back to the ☰ button on close.
-(function mobileMenu() {
-  const header = $('.site-header');
-  const toggle = $('.menu-toggle', header);
-  const menu = $('#mobile-menu');
-  if (!header || !toggle || !menu) return;
-  const icon = $('use', toggle);
-  const desktop = matchMedia('(min-width: 1101px)');
-
-  const isOpen = () => !menu.hidden;
-  function open() {
-    menu.hidden = false;
-    toggle.setAttribute('aria-expanded', 'true');
-    toggle.setAttribute('aria-label', 'Close menu');
-    icon.setAttribute('href', '#i-x');
-    document.documentElement.style.overflow = 'hidden';
-    $('a', menu)?.focus();
-    window.dataLayer?.push({ event: 'mobile_menu_open' });
-  }
-  function close({ restoreFocus = true } = {}) {
-    if (!isOpen()) return;
-    menu.hidden = true;
-    toggle.setAttribute('aria-expanded', 'false');
-    toggle.setAttribute('aria-label', 'Open menu');
-    icon.setAttribute('href', '#i-menu');
-    document.documentElement.style.overflow = '';
-    if (restoreFocus) toggle.focus({ preventScroll: true });
-  }
-
-  toggle.addEventListener('click', () => (isOpen() ? close() : open()));
-  // A link closes the menu first (unlocking the scroll) so its normal jump to the section works.
-  menu.addEventListener('click', (e) => { if (e.target.closest('a')) close(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isOpen()) close(); });
-  document.addEventListener('pointerdown', (e) => { if (isOpen() && !header.contains(e.target)) close({ restoreFocus: false }); });
-  document.addEventListener('focusin', (e) => { if (isOpen() && !header.contains(e.target)) close({ restoreFocus: false }); });
-  desktop.addEventListener('change', (e) => { if (e.matches) close({ restoreFocus: false }); });
-})();
 
 /* ---------------------------------------------------------------- entrances */
 const revealables = $$('[data-reveal]');

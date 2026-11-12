@@ -191,13 +191,31 @@ Everything below the hero is a calm, bright SaaS page in the app's own visual la
 ## How offline works
 
 The navy band's picture is a tilted product shot built in HTML, not a screenshot, so it
-uses the sample shop: the Point of Sale till sits behind, the offline cart in front, and
-the network pill nearest. While it is on screen it plays the offline story in a loop:
+uses the sample shop: one card, the offline cart, with the network pill beside it (no
+window or product cards behind it, so the picture reads as one simple, familiar screen). While it is on screen it plays the offline story in a loop:
 three sale lines are added with the red "You're offline … N pending" banner, the pill
 turns Online, the banner turns blue "Syncing changes…", then clears. The banner wording
 is the app's. On touch screens, where there is no hover, the scene also sways slowly
 between its tilted and flatter angles on its own. With reduced motion it holds the
 offline state with all three lines and does not move.
+
+The band's own Request a Demo is the white `btn-light` (navy text), never the blue
+primary: the cart's blue Proceed to Payment is part of the picture and must not look
+like the same kind of control as the page's call to action.
+
+## Header and hero buttons
+
+At 1100px and below the section links and Login leave the bar: it keeps the logo,
+Request a Demo and a 44px hamburger, which opens a panel under the bar with the four
+links (52px ruled rows, 17px) and Login. Tapping a link, outside the panel or Escape
+closes it. Figma: "Mobile · menu open" next to the mobile frame.
+
+The hero's Request a Demo and Chat on WhatsApp sit side by side on tablet and desktop
+(561px and up) and stack full width on every phone (560px and below).
+
+The Point of Sale feature card shows two products (Instant Noodles 70g, Sugar 500g) and
+the cart: beside them on desktop, under them up to 1000px. Phones (560px and below) show
+Instant Noodles 70g only, above the cart.
 
 ## Product tour
 
@@ -257,8 +275,7 @@ tagline "Smarter. Faster. Better." sits under it at 24px / 600 navy (20px on pho
 below the headline and 16px above the lead; the footer repeats it under the logo.
 On phones the footer is the brand and tagline, then one ruled row per link group: the small
 uppercase label in a 116px left column and its links stacked on the right, baseline-aligned;
-the copyright lines sit 6px apart under a final rule. The tilted offline scene reserves 80px above the cart when it sits beside the copy, so
-the till is never cut off by the section edge.
+the copyright lines sit 6px apart under a final rule.
 
 WhatsApp prompt (contact column, option B chosen 2026-10-29): no card. A hairline, the
 question "Rather chat?" (28px bold, 24px on phones) and one green (`green-700`) underlined
