@@ -862,6 +862,32 @@ svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width:
 .submit[disabled] { opacity: 0.7; cursor: progress; }
 .form-status { font-size: 14px; }
 .form-status:empty { display: none; }
+.form-status.is-ok { color: var(--green-700); }
+.form-status.is-error { color: var(--red); }
+.form-status a { font-weight: 600; }
+
+/* notifications: dashboard-style toasts, top-right under the sticky header. Not a live region
+   (the form's .form-status reads the result aloud); never takes focus; the page stays usable. */
+.notices { position: fixed; top: calc(76px + 16px); right: 24px; z-index: 70; display: flex; flex-direction: column; gap: 8px; width: min(356px, calc(100% - 32px)); pointer-events: none; }
+.notice { display: flex; align-items: flex-start; gap: 10px; padding: 14px 10px 14px 16px; border: 1px solid; border-radius: var(--r-ctl); box-shadow: var(--shadow-card); font-size: 14px; font-weight: 500; line-height: 1.45; pointer-events: auto; animation: notice-in 200ms var(--ease) both; }
+.notice > svg { flex: none; width: 18px; height: 18px; margin-top: 1px; }
+.notice p { flex: 1; min-width: 0; }
+.notice.is-ok { background: var(--green-50); border-color: var(--green-200); color: var(--green-700); }
+.notice.is-error { background: var(--red-50); border-color: color-mix(in srgb, var(--red) 35%, var(--white)); color: var(--red); }
+.notice.is-warning { background: var(--amber-50); border-color: var(--amber-200); color: var(--amber-700); }
+.notice.is-info { background: var(--blue-50); border-color: var(--navy-300); color: var(--blue); }
+.notice.out { opacity: 0; transform: translateY(-8px); transition: opacity 160ms ease, transform 160ms ease; }
+/* ✕: same idea as the dashboard — the toast's own colour, muted at rest, a light tint on hover.
+   32px to look at, 44px to tap (the ::before widens the hit area). */
+.notice-x { position: relative; flex: none; display: grid; place-items: center; width: 32px; height: 32px; margin: -6px 0; padding: 0; border: 0; border-radius: 8px; background: transparent; color: inherit; cursor: pointer; }
+.notice-x::before { content: ""; position: absolute; inset: -6px; }
+.notice-x svg { width: 16px; height: 16px; opacity: 0.7; }
+.notice-x:hover { background: color-mix(in srgb, currentColor 20%, transparent); }
+.notice-x:hover svg { opacity: 1; }
+@keyframes notice-in { from { opacity: 0; transform: translateY(-8px); } }
+@media (max-width: 600px) {
+  .notices { left: 16px; right: 16px; width: auto; }
+}
 
 /* footer */
 .footer { padding: 64px 0 40px; border-top: 1px solid var(--line); }
@@ -1109,4 +1135,5 @@ svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width:
   .track[aria-hidden="true"] { display: none; }
   .marquee { -webkit-mask-image: none; mask-image: none; }
   .btn, .toast, .o-scene, .tile-ico, .tile-label, .pc-prices button, .net, .try svg, .ab, .rail-list button::after { transition: none; }
+  .notice, .notice.out { animation: none; transition: none; transform: none; }
 }
