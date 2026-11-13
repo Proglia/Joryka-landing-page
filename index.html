@@ -377,11 +377,12 @@ FORM: category standard (classic SaaS), the user's restored Figma design; the he
     <form class="form-card" id="demo-form" novalidate data-reveal>
       <div class="form-head"><h3>Request a Demo</h3><p>All fields are required unless marked optional.</p></div>
       <div class="row2">
-        <div class="field"><label for="f-name">Full name</label><input id="f-name" name="name" autocomplete="name" required placeholder="e.g. Chinedu Okafor"><p class="err" id="e-name" hidden>Enter your name.</p></div>
-        <div class="field"><label for="f-biz">Business name</label><input id="f-biz" name="business" autocomplete="organization" required placeholder="e.g. Ngozi Provisions"><p class="err" id="e-biz" hidden>Enter your business name.</p></div>
+        <div class="field"><label for="f-name">Full name</label><input id="f-name" name="name" autocomplete="name" maxlength="100" required placeholder="e.g. Chinedu Okafor"><p class="err" id="e-name" hidden>Enter your name.</p></div>
+        <div class="field"><label for="f-biz">Business name</label><input id="f-biz" name="business" autocomplete="organization" maxlength="150" required placeholder="e.g. Ngozi Provisions"><p class="err" id="e-biz" hidden>Enter your business name.</p></div>
       </div>
-      <div class="field"><label for="f-contact">Phone number or email</label><input id="f-contact" name="contact" autocomplete="tel" required placeholder="e.g. 0803 555 0142"><p class="err" id="e-contact" hidden>Enter a phone number or an email address we can reach you on.</p></div>
-      <div class="field"><label for="f-msg">Message <span>(optional)</span></label><textarea id="f-msg" name="message" rows="3" placeholder="Tell us about your shop"></textarea></div>
+      <div class="field"><label for="f-contact">Phone number or email</label><input id="f-contact" name="contact" autocomplete="on" maxlength="150" required placeholder="e.g. 0803 555 0142"><p class="err" id="e-contact" hidden>Enter a phone number or an email address we can reach you on.</p></div>
+      <div class="field"><label for="f-msg">Message <span>(optional)</span></label><textarea id="f-msg" name="message" rows="3" maxlength="1000" placeholder="Tell us about your shop"></textarea><p class="err" id="e-msg" hidden>Check your message.</p></div>
+      <div class="hp" aria-hidden="true"><label for="f-website">Website (leave empty)</label><input id="f-website" name="website" tabindex="-1" autocomplete="off"></div>
       <p class="fine">We’ll only use these details to arrange your demo. See our <a href="#privacy">Privacy notice</a>.</p>
       <button class="btn btn-lg btn-block submit" type="submit">Request a Demo</button>
       <p class="form-status" role="status" aria-live="polite"></p>
@@ -400,6 +401,10 @@ FORM: category standard (classic SaaS), the user's restored Figma design; the he
   </div>
   <div class="container foot-base"><span>© 2026 Joryka. All rights reserved.</span><span>Built for retailers and wholesalers in Nigeria · Figures in the playground are sample data</span></div>
 </footer>
+
+<!-- Notifications (demo form results), top-right under the header. Deliberately NOT a live
+     region: the form's own .form-status already reads the result aloud. -->
+<div class="notices"></div>
 
 <script src="app.js" defer></script>
 </body>

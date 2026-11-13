@@ -301,6 +301,23 @@ in a continuous loop (pauses on hover). App pages fade in over 320ms; modals ris
 side panel slides in from the right. All motion stops under `prefers-reduced-motion`, and
 the strip becomes a wrapped list.
 
+## Notifications
+
+The demo form's result also shows as a toast that looks like the Joryka dashboard's: top
+right, just under the sticky header (full width with 16px sides on phones), a 356px card
+with a 12px radius, hairline border, soft card shadow, a type icon, 14px / 500 text and a ✕
+in the top-right corner (muted at rest, light tint on hover, 44px tap area). Colours come
+from the status tokens: success `green-50` / `green-200` / `green-700`; error `red-50` /
+`red` mixed with white for the border / `red`; spare warning (`amber-*`) and info
+(`blue-50` / `navy-300` / `blue`). Success stays 4s, errors 8s; the timer pauses on hover,
+while the ✕ has focus and while the tab is hidden; a new toast replaces the old one. It
+fades in and drops 8px over 200ms, with no motion under `prefers-reduced-motion`.
+Toasts are only for the send result: none for field errors (they stay under each field)
+and none while sending (the button says "Sending…"). The inline message under the form
+stays as the screen-reader announcement and the lasting record, green on success and red
+on errors, and it keeps the WhatsApp link, which never goes in a toast. The playground's
+own navy toast (bottom centre, inside the sample app's story) is separate and unchanged.
+
 ## Content rules
 
 - One sample shop across the page, the playground and the promo video (`../Joryka promo video/sample-shop.json`; the playground keeps its own copy of

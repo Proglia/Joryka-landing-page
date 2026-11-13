@@ -2,10 +2,18 @@
 
 // Launch blockers (PRD §30): fill these before the page goes public.
 const CONFIG = {
-  loginUrl: '',        // canonical Joryka app URL, e.g. 'https://app.joryka.com'
-  whatsappNumber: '',  // official business number in international format, digits only, e.g. '2348000000000'
+  // Login: your local Joryka app when the page runs on localhost, otherwise the dev app.
+  // For launch, replace the dev URL with the production app URL.
+  loginUrl: ['localhost', '127.0.0.1'].includes(location.hostname)
+    ? 'http://localhost:5173/login'
+    : 'https://dev.joryka.com/login',
+  whatsappNumber: '2349022310523',  // Client's official Nigerian WhatsApp number.
   whatsappText: 'Hello Joryka, I would like to know more about the POS for my business.',
-  demoEndpoint: '',    // approved form / CRM endpoint that accepts a JSON POST
+  // Demo form: your local Joryka backend when the page runs on localhost, otherwise the dev API.
+  // For launch, replace the dev API URL with the production API URL.
+  demoEndpoint: ['localhost', '127.0.0.1'].includes(location.hostname)
+    ? 'http://localhost:3001/api/demo-requests'
+    : 'https://dev-api.joryka.com/api/demo-requests',
 };
 
 document.documentElement.classList.add('js');
@@ -1144,50 +1152,201 @@ render();
 addEventListener('load', drawWire);
 requestAnimationFrame(drawWire);
 
+/* ---------------------------------------------------------------- notifications (demo form) */
+// Dashboard-style toast, top-right under the header. Separate from the playground's toast() above.
+// Not a live region: the form's .form-status reads the result aloud, so this is a visual extra.
+// Closes by itself (the timer pauses on hover, while the ✕ has focus and while the tab is hidden),
+// with the ✕ or with Escape. A new notice replaces the old one. Never moves focus into itself.
+const NOTICE_ICONS = { ok: 'i-check', error: 'i-alert', warning: 'i-alert', info: 'i-info' };
+let closeNotice = null;
+function notify(type, text, { duration = 4000, returnFocus = null } = {}) {
+  const host = $('.notices');
+  if (!host) return;
+  closeNotice?.({ instant: true });
+  const el = document.createElement('div');
+  el.className = `notice is-${type}`;
+  el.innerHTML = `${ico(NOTICE_ICONS[type] || 'i-info')}<p></p><button type="button" class="notice-x" aria-label="Close notification">${ico('i-x')}</button>`;
+  $('p', el).textContent = text;
+  host.append(el);
+
+  const listeners = new AbortController();
+  const holds = new Set();
+  let remaining = duration, startedAt = 0, timer = 0, closed = false;
+  const run = () => {
+    if (closed || timer || holds.size) return;
+    startedAt = Date.now();
+    timer = setTimeout(() => close(), remaining);
+  };
+  const pause = () => {
+    if (!timer) return;
+    clearTimeout(timer);
+    timer = 0;
+    remaining = Math.max(0, remaining - (Date.now() - startedAt));
+  };
+  const hold = (why, on) => { if (on) { holds.add(why); pause(); } else { holds.delete(why); run(); } };
+  function close({ instant = false } = {}) {
+    if (closed) return;
+    closed = true;
+    clearTimeout(timer);
+    listeners.abort();
+    if (closeNotice === close) closeNotice = null;
+    // Closing from the ✕ or Escape: don't leave keyboard focus on a removed element.
+    if (el.contains(document.activeElement)) returnFocus ? returnFocus.focus({ preventScroll: true }) : document.activeElement.blur();
+    if (instant || reduced) { el.remove(); return; }
+    el.classList.add('out');
+    setTimeout(() => el.remove(), 180);
+  }
+  closeNotice = close;
+
+  const opts = { signal: listeners.signal };
+  $('.notice-x', el).addEventListener('click', () => close(), opts);
+  el.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); }, opts);
+  el.addEventListener('pointerenter', () => hold('hover', true), opts);
+  el.addEventListener('pointerleave', () => hold('hover', false), opts);
+  el.addEventListener('focusin', () => hold('focus', true), opts);
+  el.addEventListener('focusout', (e) => { if (!el.contains(e.relatedTarget)) hold('focus', false); }, opts);
+  document.addEventListener('visibilitychange', () => hold('hidden', document.hidden), opts);
+  if (document.hidden) holds.add('hidden');
+  run();
+}
+
 /* ---------------------------------------------------------------- demo request form */
 const form = $('#demo-form');
 const status = $('.form-status', form);
 const submit = $('.submit', form);
+// The inline message under the button: the screen-reader announcement (role="status") and the
+// lasting record of the result. kind: 'ok' (green), 'error' (red) or '' (plain).
+function setStatus(kind, text, html = false) {
+  status.classList.toggle('is-ok', kind === 'ok');
+  status.classList.toggle('is-error', kind === 'error');
+  if (html) status.innerHTML = text; else status.textContent = text;
+}
+// Same rules as the backend's normalizeContact (joryka-backend/src/services/demoRequest/contact.js),
+// so the form never sends a contact the server will reject. Keep the two IDENTICAL.
+// Deliberately lenient (we don't want to lose leads). Valid: an email; or a phone made of digits,
+// spaces, - . ( ) with an optional leading +, with 7–15 digits — after dropping a leading 00, and
+// with an 11-digit local number starting with 0 counted as 234…. Letters → invalid.
+function isValidContact(raw) {
+  const value = raw.trim();
+  if (!value) return false;
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return true;
+  if (!/^\+?[\d\s\-.()]+$/.test(value)) return false;
+  let digits = value.replace(/\D/g, '');
+  if (!value.startsWith('+')) {
+    if (digits.startsWith('00')) digits = digits.slice(2);
+    else if (digits.length === 11 && digits.startsWith('0')) digits = `234${digits.slice(1)}`;
+    // 13 digits starting with 234 = Nigerian number without "+" (international on the backend;
+    // kept here so both copies of the rule stay identical — it doesn't change validity).
+    else if (digits.length === 13 && digits.startsWith('234')) digits = digits.slice(0);
+  }
+  return digits.length >= 7 && digits.length <= 15;
+}
 const rules = [
   ['f-name', 'e-name', (v) => v.trim().length >= 2],
   ['f-biz', 'e-biz', (v) => v.trim().length >= 2],
-  ['f-contact', 'e-contact', (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) || v.replace(/[^\d]/g, '').length >= 10],
+  ['f-contact', 'e-contact', isValidContact],
 ];
-function check(id, errId, ok) {
+// Backend field name → [input id, error id], for showing a 400's field errors in place.
+const SERVER_FIELDS = {
+  name: ['f-name', 'e-name'],
+  business: ['f-biz', 'e-biz'],
+  contact: ['f-contact', 'e-contact'],
+  message: ['f-msg', 'e-msg'],
+};
+// Remember each error's own text, so a server message never sticks around.
+Object.values(SERVER_FIELDS).forEach(([, errId]) => {
+  const err = document.getElementById(errId);
+  err.dataset.text = err.textContent;
+});
+function setFieldError(id, errId, message) {
   const input = document.getElementById(id);
   const err = document.getElementById(errId);
-  const good = ok(input.value);
-  input.setAttribute('aria-invalid', String(!good));
-  if (good) input.removeAttribute('aria-describedby'); else input.setAttribute('aria-describedby', errId);
-  err.hidden = good;
+  const bad = message !== null;
+  input.setAttribute('aria-invalid', String(bad));
+  if (bad) input.setAttribute('aria-describedby', errId); else input.removeAttribute('aria-describedby');
+  if (bad) err.textContent = message;
+  err.hidden = !bad;
+}
+function check(id, errId, ok) {
+  const good = ok(document.getElementById(id).value);
+  setFieldError(id, errId, good ? null : document.getElementById(errId).dataset.text);
   return good;
 }
-rules.forEach(([id, errId, ok]) => document.getElementById(id).addEventListener('blur', (e) => { if (e.target.value) check(id, errId, ok); }));
+// Pressing the mouse on "Request a Demo" takes focus from the field first. Re-checking the field
+// right then would show or hide its error, move the button, and the release would miss it (the
+// click is lost). So while the button is pressed, wait: the submit checks every field anyway, and
+// the waiting check runs just after the release (also when the visitor drags off and lets go).
+let pressingSubmit = false, waitingCheck = null;
+submit.addEventListener('pointerdown', (e) => { if (e.button === 0) pressingSubmit = true; });
+const releaseSubmit = () => {
+  if (!pressingSubmit) return;
+  // setTimeout: after this release's click (and so the submit) has run.
+  setTimeout(() => { pressingSubmit = false; const run = waitingCheck; waitingCheck = null; run?.(); });
+};
+addEventListener('pointerup', releaseSubmit);
+addEventListener('pointercancel', releaseSubmit);
+rules.forEach(([id, errId, ok]) => document.getElementById(id).addEventListener('blur', (e) => {
+  if (!e.target.value) return;
+  if (pressingSubmit) { waitingCheck = () => check(id, errId, ok); return; }
+  check(id, errId, ok);
+}));
+// The message has no browser-side rule; clear a server error on it as soon as it's edited.
+document.getElementById('f-msg').addEventListener('input', () => setFieldError('f-msg', 'e-msg', null));
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   const results = rules.map((r) => check(...r));
   if (results.includes(false)) {
     document.getElementById(rules[results.indexOf(false)][0]).focus();
-    status.textContent = 'Check the highlighted field and try again.';
+    setStatus('error', 'Check the highlighted field and try again.');
     return;
   }
   const data = Object.fromEntries(new FormData(form));
   if (!CONFIG.demoEndpoint) {
-    status.textContent = 'Preview only: demo requests are not connected yet, so nothing was sent.';
+    setStatus('', 'Preview only: demo requests are not connected yet, so nothing was sent.');
     return;
   }
+  // Clear the previous result, so the same message is announced again if it repeats.
+  setStatus('', '');
   submit.disabled = true;
   submit.textContent = 'Sending…';
+  // Give up after 15 seconds so a slow server shows the error message instead of "Sending…" forever.
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
   try {
-    const res = await fetch(CONFIG.demoEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...data, source_page: location.pathname, created_at: new Date().toISOString() }) });
+    const res = await fetch(CONFIG.demoEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...data, source_page: location.pathname, created_at: new Date().toISOString() }), signal: controller.signal });
+    // 400 with field errors → show each one under its field (first message per field) and keep
+    // what the visitor typed. Anything else that isn't OK falls through to the generic error.
+    if (res.status === 400) {
+      const body = await res.json().catch(() => null);
+      const fieldErrors = (Array.isArray(body?.errors) ? body.errors : [])
+        .filter((er) => SERVER_FIELDS[er.path ?? er.param] && typeof er.msg === 'string' && er.msg.trim())
+        // Backend messages have no full stop; add one so they read like the form's own errors.
+        .map((er) => ({ field: er.path ?? er.param, msg: /[.!?]$/.test(er.msg.trim()) ? er.msg.trim() : `${er.msg.trim()}.` }));
+      if (fieldErrors.length) {
+        const shown = new Set();
+        fieldErrors.forEach(({ field, msg }) => {
+          if (shown.has(field)) return;
+          shown.add(field);
+          setFieldError(...SERVER_FIELDS[field], msg);
+        });
+        document.getElementById(SERVER_FIELDS[fieldErrors[0].field][0]).focus();
+        setStatus('error', 'Check the highlighted field and try again.');
+        window.dataLayer?.push({ event: 'demo_form_submit_error', error_category: 'validation' });
+        return;
+      }
+    }
     if (!res.ok) throw new Error(res.status);
     form.reset();
-    status.textContent = 'Thank you. Your demo request has been sent.';
+    setStatus('ok', 'Thank you. Your demo request has been sent.');
+    notify('ok', 'Thank you. Your demo request has been sent.', { duration: 4000, returnFocus: submit });
     window.dataLayer?.push({ event: 'demo_form_submit_success' });
   } catch {
-    status.innerHTML = 'We couldn’t send your request. Please try again' + (CONFIG.whatsappNumber ? ` or <a href="https://wa.me/${CONFIG.whatsappNumber}">contact us on WhatsApp</a>.` : '.');
+    setStatus('error', 'We couldn’t send your request. Please try again' + (CONFIG.whatsappNumber ? ` or <a href="https://wa.me/${CONFIG.whatsappNumber}">contact us on WhatsApp</a>.` : '.'), true);
+    // No link in the toast: it disappears, so the WhatsApp link stays in the inline message.
+    notify('error', 'We couldn’t send your request. Please try again.', { duration: 8000, returnFocus: submit });
     window.dataLayer?.push({ event: 'demo_form_submit_error', error_category: 'network' });
   } finally {
+    clearTimeout(timeout);
     submit.disabled = false;
     submit.textContent = 'Request a Demo';
   }
