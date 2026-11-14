@@ -197,6 +197,7 @@ const linesTotal = (lines) => sum(lines, (l) => price(l) * l.qty);
 const totalStock = (p) => p.stock.primary + p.stock.secondary;
 const level = (n, p) => (n === 0 ? 'out' : n < p.reorder ? 'low' : 'ok');
 const ctnSplit = (n) => `${Math.floor(n / PER)} ctn · ${n % PER} units`;
+const ctnWords = (n) => { const c = Math.floor(n / PER), u = n % PER; return `${c} carton${c === 1 ? '' : 's'} and ${u} loose unit${u === 1 ? '' : 's'}`; };
 const ctnShort = (n) => `${Math.floor(n / PER)} ctn + ${n % PER} u`;
 const balance = (c) => sum(c.ledger, (e) => e.a);
 const owing = () => CUSTOMERS.filter((c) => balance(c) > 0);
@@ -245,18 +246,26 @@ function week() {
 const weekUnits = (p) => p.week + (today().byUnits[p.id] || 0);
 const restockList = () => PRODUCTS.filter((p) => totalStock(p) < p.reorder).sort((a, b) => totalStock(a) - totalStock(b));
 const usualRate = (p) => p.rate.primary + p.rate.secondary;
+const TERMS = 14; // days a credit sale has before it is overdue
+const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const dayMonth = (dt) => `${dt.getDate()} ${MON[dt.getMonth()]}`;
+function openSales(c) {
+  // payments settle the oldest sales first; what is left of each sale is still open
+  let paid = -sum(c.ledger.filter((e) => e.a < 0), (e) => e.a);
+  const open = [];
+  c.ledger.filter((e) => e.a > 0).forEach((e) => {
+    const used = Math.min(paid, e.a);
+    paid -= used;
+    if (e.a - used > 0) open.push({ ...e, left: e.a - used, age: daysAgo(e.d), due: new Date(parseD(e.d).getTime() + TERMS * 864e5) });
+  });
+  return open;
+}
 function overdueList() {
-  // payments settle the oldest sales first; whatever is left of a sale older than 14 days is overdue
+  // whatever is left of a sale older than the credit terms is overdue
   return CUSTOMERS.map((c) => {
-    let paid = -sum(c.ledger.filter((e) => e.a < 0), (e) => e.a);
-    const open = [];
-    c.ledger.filter((e) => e.a > 0).forEach((e) => {
-      const used = Math.min(paid, e.a);
-      paid -= used;
-      if (e.a - used > 0) open.push({ ...e, left: e.a - used });
-    });
-    const old = open.filter((e) => daysAgo(e.d) > 14);
-    return { c, amount: sum(old, (e) => e.left), oldest: open[0], days: open[0] ? daysAgo(open[0].d) : 0 };
+    const open = openSales(c);
+    const old = open.filter((e) => e.age > TERMS);
+    return { c, amount: sum(old, (e) => e.left), items: old, oldest: open[0], days: open[0] ? open[0].age : 0, late: old.length ? old[0].age - TERMS : 0 };
   }).filter((x) => x.amount > 0);
 }
 const slowList = () => PRODUCTS.filter((p) => p.week === 0 && !today().byUnits[p.id] && totalStock(p) > 0);
@@ -668,7 +677,7 @@ function attention() {
   PRODUCTS.filter((p) => totalStock(p) === 0 && usualRate(p) > 0).forEach((p) => items.push({ tone: 'Urgent', key: 'reorder', text: `${p.name} is out of stock in both warehouses. It usually sells about ${usualRate(p)} a day.` }));
   const change = pct(w.total - LAST_WEEK.total, LAST_WEEK.total);
   if (change < 0) items.push({ tone: change < -10 ? 'Urgent' : 'Watch', key: 'sales', text: `Sales are ${Math.abs(change).toFixed(1)}% below last week. The data explains part of it.` });
-  overdueList().forEach((o) => items.push({ tone: 'Watch', key: 'overdue', text: `${o.c.name}’s ${naira(o.amount)} is ${o.days} days overdue.` }));
+  overdueList().forEach((o) => items.push({ tone: 'Watch', key: 'overdue', text: `${o.c.name}’s ${naira(o.amount)} is ${o.late} day${o.late === 1 ? '' : 's'} overdue.` }));
   restockList().filter((p) => totalStock(p) > 0).forEach((p) => items.push({ tone: 'Watch', key: 'reorder', text: `${p.name} is below its reorder level: ${totalStock(p)} left, reorder at ${p.reorder}.` }));
   return items.sort((a, b) => (a.tone === b.tone ? 0 : a.tone === 'Urgent' ? -1 : 1));
 }
@@ -686,7 +695,7 @@ function cards() {
     { key: 'reorder', label: 'Needs reorder', icon: 'i-alert', tone: 'red', iconTone: 'red', value: `${re.length} product${re.length === 1 ? '' : 's'}`, text: re.length ? re.map((p) => `${p.name} (${totalStock(p)} left)`).join(', ') + '.' : 'Every product is above its reorder level.' },
     { key: 'overdue', label: 'Overdue credit', icon: 'i-clock', tone: 'amber', iconTone: 'amber', value: money(sum(od, (o) => o.amount)), text: od.length ? `${naira(sum(od, (o) => o.amount))} overdue from ${od.length} customer${od.length === 1 ? '' : 's'}. The oldest is ${Math.max(...od.map((o) => o.days))} days old.` : 'No credit is more than 14 days old.' },
     { key: 'slow', label: 'Slow-moving stock', icon: 'i-hourglass', tone: 'violet', iconTone: 'violet', value: `${slow.length} product${slow.length === 1 ? '' : 's'}`, text: slow.length ? `No sales in 30 days, ${naira(sum(slow, (p) => totalStock(p) * p.cost))} tied up.` : 'Everything has sold in the last 30 days.' },
-    { key: 'action', label: 'Recommended action', icon: 'i-bulb', tone: 'ink', iconTone: 'navy', value: first ? `Restock ${first.name.replace(/ \d.*$/, '')}` : od.length ? `Call ${od[0].c.name.split(' ')[0]}` : 'Nothing urgent', text: first ? `${totalStock(first)} in stock, ${usualRate(first) ? `selling about ${usualRate(first)} a day` : 'below its reorder level'}.` : od.length ? `${naira(od[0].amount)} is ${od[0].days} days overdue.` : 'Stock and credit are in good shape.' },
+    { key: 'action', label: 'Recommended action', icon: 'i-bulb', tone: 'ink', iconTone: 'navy', value: first ? `Restock ${first.name.replace(/ \d.*$/, '')}` : od.length ? `Call ${od[0].c.name.split(' ')[0]}` : 'Nothing urgent', text: first ? `${totalStock(first)} in stock, ${usualRate(first) ? `selling about ${usualRate(first)} a day` : 'below its reorder level'}.` : od.length ? `${naira(od[0].amount)} is ${od[0].late} day${od[0].late === 1 ? '' : 's'} overdue.` : 'Stock and credit are in good shape.' },
   ];
 }
 const SUGGEST = [['week', 'What were sales this week?'], ['compare', 'Compare with last week'], ['top', 'Top-selling products'], ['wh', 'Which warehouse sold the most?'], ['reorder', 'What needs reordering?'], ['owe', 'Who owes us the most?'], ['why', 'Why did sales change?']];
@@ -737,17 +746,137 @@ const ASK = {
       foot: `Based on ${w.count} sales this week and last week’s records`, view: 'reports',
     };
   },
+  stock({ prod = 'sugar', wh, most } = {}) {
+    const p = P(prod);
+    if (most) {
+      const [a, b] = [...WAREHOUSES].sort((x, y) => p.stock[y.id] - p.stock[x.id]);
+      wh = p.stock[a.id] > p.stock[b.id] ? a.id : undefined;
+      if (!wh) return { h: `Both warehouses hold the same amount of ${p.name}: ${ctnWords(p.stock[a.id])} each.`, foot: `Based on stock records for ${p.name}, ${TODAY_LABEL.short}`, view: 'inventory' };
+      return { h: `${a.name} has the most ${p.name}: ${ctnWords(p.stock[a.id])}.`, p: `${b.name} has ${ctnWords(p.stock[b.id])}.`, ev: `<ul class="a-list">${WAREHOUSES.map((w) => `<li><span><b>${w.name}</b><small>${p.stock[w.id]} units</small></span><em>${ctnShort(p.stock[w.id])}</em></li>`).join('')}</ul>`, foot: `Based on stock records for ${p.name}, ${TODAY_LABEL.short}`, view: 'inventory' };
+    }
+    const n = wh ? p.stock[wh] : totalStock(p);
+    const where = wh ? WH_NAME[wh] : 'Across both warehouses, you';
+    const head = `${wh ? `${where} has` : `${where} have`} ${ctnWords(n)} of ${p.name}.`;
+    const note = n === 0 ? `It is out of stock${wh ? ' there' : ''}.` : `That’s ${n} unit${n === 1 ? '' : 's'} in all, at ${PER} units to a carton.`;
+    const low = totalStock(p) < p.reorder ? ` Across both warehouses it’s below its reorder level of ${p.reorder}.` : '';
+    return { h: head, p: note + low, ev: `<ul class="a-list">${WAREHOUSES.map((w) => `<li><span><b>${w.name}</b><small>${p.stock[w.id]} units</small></span><em>${ctnShort(p.stock[w.id])}</em></li>`).join('')}</ul>`, foot: `Based on stock records for ${p.name}, ${TODAY_LABEL.short}`, view: 'inventory' };
+  },
+  which({ wh, name } = {}) {
+    return { h: name ? `I can’t find a product called “${esc(name)}” in your inventory.` : 'Which product do you want the stock count for?', p: `${name ? 'Check the name, or pick one of your products. ' : ''}I can give the count in cartons and loose units${wh ? ` for ${WH_NAME[wh]}` : ' for each warehouse'}.${name ? '' : ' I couldn’t match a product in your inventory from that question.'} Try, for example, “How many cartons of sugar are in the secondary warehouse?”`, ev: `<ul class="a-list">${PRODUCTS.slice(0, 6).map((p) => `<li><span><b>${p.name}</b><small>${p.sku}</small></span><em>${ctnShort(wh ? p.stock[wh] : totalStock(p))}</em></li>`).join('')}</ul>`, foot: `Showing 6 of ${PRODUCTS.length} products${wh ? ` in ${WH_NAME[wh]}` : ' across both warehouses'}`, view: 'inventory' };
+  },
+  price({ prod } = {}) {
+    const p = P(prod);
+    return { h: `${p.name} sells for ${naira(p.unit)} a unit or ${naira(p.ctn)} a carton.`, p: `Its weighted-average cost is ${naira(p.cost)} a unit, so each unit sold makes about ${naira(p.unit - p.cost)} gross profit.`, foot: `Based on the product record for ${p.name}`, view: 'inventory' };
+  },
+  psales({ prod, wh, period = 'week' } = {}) {
+    const p = P(prod);
+    const t = today();
+    if (period === 'today' || period === 'week') {
+      const u = period === 'today' ? (t.byUnits[p.id] || 0) : weekUnits(p);
+      const gap = wh ? { gapTitle: 'The records don’t split this by warehouse', gap: `Product sales here are totalled across both warehouses, so I can’t say how much of it ${WH_NAME[wh]} sold.` } : {};
+      return { h: `You’ve sold ${u} unit${u === 1 ? '' : 's'} of ${p.name} ${period === 'today' ? 'today' : 'this week'}${u ? `, about ${naira(u * p.unit)}` : ''}.`, p: u ? `That’s ${ctnWords(u)}.` : '', ...gap, foot: period === 'today' ? `Based on today’s sales, ${TODAY_LABEL.short}` : `Based on units sold, ${RANGE}`, view: 'inventory' };
+    }
+    return ASK.sales({ period, what: `${p.name} sales` });
+  },
+  profit({ period = 'week' } = {}) {
+    if (period === 'yesterday' || period === 'other') return ASK.sales({ period, what: 'gross profit' });
+    const f = period === 'today' ? (() => { const t = today(); return { total: t.total, profit: t.profit, label: 'today', note: TODAY_LABEL.short }; })()
+      : period === 'last' ? { total: LAST_WEEK.total, profit: Math.round(LAST_WEEK.total * LAST_WEEK.margin), label: 'last week', note: `Wed ${LAST_WEEK.from} – Tue ${LAST_WEEK.to}` }
+      : (() => { const w = week(); return { total: w.total, profit: w.profit, label: 'this week', note: RANGE }; })();
+    const cogs = f.total - f.profit;
+    const m = pct(f.profit, f.total);
+    return {
+      h: `Gross profit ${f.label} is ${naira(f.profit)}, a ${m.toFixed(1)}% margin.`,
+      p: `That’s ${naira(f.total)} in sales minus ${naira(cogs)} cost of goods sold. Each item sold is costed at its weighted-average purchase cost.`,
+      ev: meter('Sales', '', naira(f.total), 100, 'was') + meter('Cost of goods sold', 'Weighted-average cost', naira(cogs), pct(cogs, f.total), 'gap') + meter('Gross profit', `${m.toFixed(1)}% margin`, naira(f.profit), pct(f.profit, f.total)),
+      gapTitle: 'This is gross profit, not net profit', gap: 'Joryka doesn’t have your running costs, such as rent, salaries and transport.',
+      foot: `Based on sales and stock costs, ${f.note}`, view: 'reports',
+    };
+  },
+  net() {
+    const w = week();
+    return { h: 'I can’t work out net profit from these records.', p: `Net profit needs your running costs, such as rent, salaries, transport and power, and those aren’t recorded in Joryka. What I can tell you is gross profit: ${naira(w.profit)} this week, a ${pct(w.profit, w.total).toFixed(1)}% margin on ${naira(w.total)} of sales.`, foot: `Based on sales and stock costs, ${RANGE}`, view: 'reports' };
+  },
+  overdue({ cust } = {}) {
+    const od = overdueList();
+    const notDue = CUSTOMERS.map((c) => ({ c, items: openSales(c).filter((e) => e.age <= TERMS) })).filter((x) => x.items.length);
+    const notDueLine = notDue.length ? ` Not yet due: ${notDue.map((x) => `${x.c.name} owes ${naira(sum(x.items, (e) => e.left))}, due ${dayMonth(x.items[0].due)}`).join('; ')}.` : '';
+    const foot = `Based on ${CUSTOMERS.length} customer records · Credit is overdue ${TERMS} days after the sale`;
+    if (cust) {
+      const c = C(cust);
+      const o = od.find((x) => x.c.id === cust);
+      const open = openSales(c);
+      if (o) return { h: `Yes. ${c.name} has ${naira(o.amount)} overdue, ${o.late} day${o.late === 1 ? '' : 's'} past due.`, p: `It’s from ${o.items.map((e) => `${e.desc.replace('Sales Invoice ', '')} on ${e.d}, due ${dayMonth(e.due)}`).join(' and ')}.`, foot, view: 'money' };
+      return { h: `${c.name} has nothing overdue.`, p: open.length ? `${c.name.split(' ')[0]} owes ${naira(sum(open, (e) => e.left))}, which is due ${dayMonth(open[0].due)}.` : `${c.name.split(' ')[0]} doesn’t owe you anything.`, foot, view: 'money' };
+    }
+    if (!od.length) return { h: 'No customer has an overdue balance.', p: `Nothing is more than ${TERMS} days past its sale date.` + notDueLine, foot, view: 'money' };
+    const total = sum(od, (o) => o.amount);
+    return {
+      h: `${od.length} customer${od.length === 1 ? ' has' : 's have'} overdue balances: ${naira(total)} in all.`,
+      p: `${od.map((o) => `${o.c.name} owes ${naira(o.amount)}, ${o.late} day${o.late === 1 ? '' : 's'} overdue`).join('; ')}.` + notDueLine,
+      ev: `<ul class="a-list">${od.sort((a, b) => b.late - a.late).map((o) => `<li><span><b>${o.c.name}</b><small>${o.late} day${o.late === 1 ? '' : 's'} overdue · due ${dayMonth(o.items[0].due)}</small></span><em class="neg">${naira(o.amount)}</em></li>`).join('')}</ul>`,
+      foot, view: 'money',
+    };
+  },
+  cust({ cust } = {}) {
+    const c = C(cust);
+    const owed = balance(c);
+    const o = overdueList().find((x) => x.c.id === cust);
+    const lp = [...c.ledger].reverse().find((e) => e.a < 0);
+    if (owed <= 0) return { h: `${c.name} doesn’t owe you anything.`, p: lp ? `Their last payment was ${naira(-lp.a)} on ${lp.d}.` : '', foot: `Based on ${c.name}’s account`, view: 'money' };
+    return { h: `${c.name} owes you ${naira(owed)}.`, p: (o ? `${naira(o.amount)} of it is ${o.late} day${o.late === 1 ? '' : 's'} overdue.` : `None of it is overdue yet. It’s due ${dayMonth(openSales(c)[0].due)}.`) + (lp ? ` Last payment: ${naira(-lp.a)} on ${lp.d}.` : ' No payment yet.'), foot: `Based on ${c.name}’s account`, view: 'money' };
+  },
+  sales({ period, what = 'sales' } = {}) {
+    if (period === 'today') { const t = today(); return { h: `You’ve sold ${naira(t.total)} today across ${t.count} sales.`, foot: `Based on ${t.count} sales, ${TODAY_LABEL.short}`, view: 'reports' }; }
+    if (period === 'yesterday' && what === 'sales') { const d = PAST_DAYS[PAST_DAYS.length - 1]; return { h: `Yesterday, ${d.day} ${d.date}, you sold ${naira(d.total)} across ${d.count} sales.`, foot: `Based on ${d.count} sales, ${d.day} ${d.date}`, view: 'reports' }; }
+    if (period === 'last' && what === 'sales') return { h: `Last week’s sales came to ${naira(LAST_WEEK.total)}.`, p: `That’s Wed ${LAST_WEEK.from} to Tue ${LAST_WEEK.to}. This week is at ${naira(week().total)} so far.`, foot: 'Based on last week’s records', view: 'reports' };
+    return { h: `I can’t answer that for the period you asked about.`, p: `These records give ${what} for today, this week (${RANGE}) and last week. Which of those would you like?`, foot: 'Sample records cover 14 Oct to 27 Oct', view: 'reports' };
+  },
+  unclear() {
+    return { h: 'I’m not sure what you’re asking.', p: 'I answer from your sales, stock and customer records. Could you say which product, warehouse, customer or period you mean? For example: “How many cartons of sugar are in the secondary warehouse?”, “What was gross profit this week?” or “Which customers have overdue balances?”', foot: 'Nothing was looked up for this question' };
+  },
 };
+/* Read the question for what it is about (a product, a warehouse, a customer, a period) and what it asks
+   (stock, sales, profit, overdue credit…). A question we can't place gets a clarifying reply, never a different answer. */
+const PRODUCT_WORDS = [
+  ['paste', /tomato paste|\bpaste\b/], ['tomato', /tin(ned)? tomato|\btomato(es)?\b/], ['noodles', /noodle/], ['sugar', /\bsugar/],
+  ['oil', /\boil\b/], ['milk', /\bmilk/], ['cola', /\bcola\b|\bcoke\b|soft drink/], ['detergent', /detergent|washing powder|soap powder/],
+  ['cereal', /cereal/], ['sardines', /sardine/],
+];
+const WH_WORDS = [['secondary', /\bsecondary\b|\bsecond warehouse|ojota|\bdepot\b/], ['primary', /\bprimary\b|\bmain (warehouse|store|shop)|idumota|store ?room/]];
+const SALES_W = /\bsold\b|\bsell|\bsales?\b|revenue|takings|turnover|\bmade\b|\bearn/;
+const STOCK_W = /how many|how much .* (have|left|got)|\bstock\b|\bleft\b|\bremain|cartons?|\bctn|\bunits?\b|inventory|quantity|\bqty\b|\bhave\b|on hand|available/;
+function periodOf(t) {
+  if (/\btoday\b|so far today|this morning/.test(t)) return 'today';
+  if (/yesterday/.test(t)) return 'yesterday';
+  if (/last week|previous week|past week/.test(t)) return 'last';
+  if (/month|year|quarter|january|february|march|april|\bmay\b|june|july|august|september|october|november|december|\b\d{1,2}(st|nd|rd|th)?\b/.test(t)) return 'other';
+  return 'week';
+}
 function matchQuestion(text) {
-  const t = text.toLowerCase();
-  if (/why|change|drop|fell|down/.test(t)) return 'why';
-  if (/compar|last week|versus|vs/.test(t)) return 'compare';
-  if (/warehouse|branch|depot/.test(t)) return 'wh';
-  if (/reorder|restock|run out|low|stock/.test(t)) return 'reorder';
-  if (/owe|debt|credit|balance/.test(t)) return 'owe';
-  if (/top|best|most sold|selling/.test(t)) return 'top';
-  if (/sale|sold|revenue|week/.test(t)) return 'week';
-  return null;
+  const t = text.toLowerCase().replace(/[’']/g, "'");
+  const prod = PRODUCT_WORDS.find(([, re]) => re.test(t))?.[0];
+  const wh = WH_WORDS.find(([, re]) => re.test(t))?.[0];
+  const cust = CUSTOMERS.find((c) => c.name.toLowerCase().split(' ').some((n) => new RegExp(`\\b${n}\\b`).test(t)))?.id;
+  const period = periodOf(t);
+  if (/net profit|net income|\bexpenses?\b|overhead|\brent\b|salar|wages/.test(t)) return { key: 'net', arg: { period } };
+  if (/profit|margin|\bgp\b|gross/.test(t)) return { key: 'profit', arg: { period } };
+  if (/overdue|past due|past-due|\blate\b|\bdefault|owing too long|not paid on time/.test(t)) return { key: 'overdue', arg: { cust } };
+  if (prod) {
+    if (/price|how much (is|does|for)|cost/.test(t) && !SALES_W.test(t) && !STOCK_W.test(t)) return { key: 'price', arg: { prod } };
+    if (SALES_W.test(t) && !/\bleft\b|in stock/.test(t)) return { key: 'psales', arg: { prod, wh, period } };
+    return { key: 'stock', arg: { prod, wh, most: !wh && /which (warehouse|branch|location)|where/.test(t) } };
+  }
+  if (cust) return { key: 'cust', arg: { cust } };
+  if (/\bwhy\b|reason|explain|\bdrop|\bfell\b|\bfall|declin|\bdown\b/.test(t)) return { key: 'why' };
+  if (/compar|\bvs\.?\b|versus|against last/.test(t) || (/last week/.test(t) && /this week/.test(t))) return { key: 'compare' };
+  if (/reorder|restock|re-stock|run(ning)? out|low stock|running low|out of stock|need to (buy|order)/.test(t)) return { key: 'reorder' };
+  if (/warehouse|branch|location/.test(t) && SALES_W.test(t)) return { key: 'wh' };
+  if (STOCK_W.test(t) && !SALES_W.test(t)) return { key: 'which', arg: { wh, name: t.match(/(?:cartons?|units?|much|many|stock) of ([a-z][a-z -]{1,30}?)(?: (?:are|is|do|does|did|in|at|left|we|have)\b|[?.!]|$)/)?.[1] } };
+  if (/\bowe|debt|debtor|credit|balance|receivable|outstanding/.test(t)) return { key: 'owe' };
+  if (/\btop\b|best|most (sold|popular)|fast(est)?[- ]moving|selling/.test(t)) return { key: 'top' };
+  if (SALES_W.test(t)) return period === 'week' ? { key: 'week' } : { key: 'sales', arg: { period } };
+  return { key: 'unclear' };
 }
 function answerHTML(a) {
   return `<div class="msg ai"><span class="bot">${ico('i-spark')}</span><div class="bubble"><p class="a-h">${a.h}</p>${a.p ? `<p class="a-p">${a.p}</p>` : ''}${a.ev ? `<div class="a-ev">${a.ev}</div>` : ''}
@@ -758,7 +887,7 @@ PAGE.ai = () => {
   const items = attention();
   const urgent = items.filter((x) => x.tone === 'Urgent').length;
   const shown = S.attnAll ? items : items.slice(0, 3);
-  const convo = S.chat.slice(-2).map((m, i, arr) => `<div class="msg me"><span class="bubble">${esc(m.q)}</span></div>${m.key ? (S.busy && i === arr.length - 1 ? '<div class="msg ai"><span class="bot">' + ico('i-spark') + '</span><div class="bubble"><p class="a-busy"><i><b></b><b></b><b></b></i>Checking your records…</p></div></div>' : answerHTML(ASK[m.key]())) : `<div class="msg ai"><span class="bot">${ico('i-spark')}</span><div class="bubble"><p class="a-p">In this sample I can answer the suggested questions. In your own shop, Joryka AI answers questions about your sales, stock and customer balances.</p></div></div>`}`).join('');
+  const convo = S.chat.slice(-2).map((m, i, arr) => `<div class="msg me"><span class="bubble">${esc(m.q)}</span></div>${m.key ? (S.busy && i === arr.length - 1 ? '<div class="msg ai"><span class="bot">' + ico('i-spark') + '</span><div class="bubble"><p class="a-busy"><i><b></b><b></b><b></b></i>Checking your records…</p></div></div>' : answerHTML(ASK[m.key](m.arg || {}))) : `<div class="msg ai"><span class="bot">${ico('i-spark')}</span><div class="bubble"><p class="a-p">In this sample I can answer the suggested questions. In your own shop, Joryka AI answers questions about your sales, stock and customer balances.</p></div></div>`}`).join('');
   return `<div class="brief-h"><p><b role="heading" aria-level="3">Daily brief</b><small>Written by AI from your data</small></p><span>${TODAY_LABEL.short} · All warehouses</span></div>
     <div class="panel attn"><p class="panel-h">Needs attention<small>${urgent} urgent · ${items.length - urgent} to watch</small></p>
       <ul>${shown.map((x) => `<li><button type="button" data-act="panel" data-v="${x.key}">${badge(x.tone, x.tone === 'Urgent' ? 'out' : 'low')}<span>${x.text}</span>${ico('i-right')}</button></li>`).join('') || '<li class="calm">Nothing needs your attention today.</li>'}</ul>
@@ -787,7 +916,7 @@ function panelHTML(key) {
     sales: { t: 'Sales this week', h: 'Sales by warehouse — this week vs last week', d: 'Oct 21 – Oct 27', body: tbl(['Warehouse', 'This week', 'Last week', 'Change', '% change'], [['Primary Warehouse', naira(w.p), naira(LAST_WEEK.p), ...chg(w.p, LAST_WEEK.p)], ['Secondary Warehouse', naira(w.s), naira(LAST_WEEK.s), ...chg(w.s, LAST_WEEK.s)], ['<b>All warehouses</b>', `<b>${naira(w.total)}</b>`, `<b>${naira(LAST_WEEK.total)}</b>`, ...chg(w.total, LAST_WEEK.total)]]), how: `Sales = everything customers paid or put on credit for completed sales, from Wed 21 Oct to today, compared with the same days last week (Wed 14 – Tue 20 Oct). Includes ${w.count} completed sales. Voided sales and debt repayments are not counted.` },
     margin: { t: 'Gross margin', h: 'Profit on this week’s sales', d: 'Oct 21 – Oct 27', body: tbl(['', 'This week', 'Last week'], [['Sales', naira(w.total), naira(LAST_WEEK.total)], ['Cost of goods sold', naira(w.total - w.profit), naira(LAST_WEEK.total * (1 - LAST_WEEK.margin))], ['Gross profit', naira(w.profit), naira(LAST_WEEK.total * LAST_WEEK.margin)], ['<b>Gross margin</b>', `<b>${pct(w.profit, w.total).toFixed(1)}%</b>`, `<b>${(LAST_WEEK.margin * 100).toFixed(1)}%</b>`]]), how: 'Gross profit = sales minus what the goods cost you, using each product’s average cost. Gross margin = gross profit ÷ sales.' },
     reorder: { t: 'Needs reorder', h: 'Products below their reorder level', d: 'Both warehouses · today', body: re.length ? tbl(['Product', 'In stock', 'Reorder at', 'Sells a day'], re.map((p) => [p.name, `<span class="${totalStock(p) ? '' : 'neg'}">${totalStock(p)}</span>`, p.reorder, usualRate(p) || '—'])) : '<p class="calm">Every product is above its reorder level.</p>', how: 'A product needs reordering when its stock across both warehouses falls below the reorder level set for it. “Sells a day” is the average over the last 30 days.' },
-    overdue: { t: 'Overdue credit', h: 'Credit older than 14 days', d: 'As of 27 Oct', body: od.length ? tbl(['Customer', 'Overdue', 'Oldest unpaid sale', 'Days'], od.map((o) => [o.c.name, naira(o.amount), o.oldest.d, o.days])) : '<p class="calm">No credit is more than 14 days old.</p>', how: 'Credit counts as overdue when part of a sale is still unpaid 14 days later. Payments are matched to the oldest sales first.' },
+    overdue: { t: 'Overdue credit', h: 'Credit older than 14 days', d: 'As of 27 Oct', body: od.length ? tbl(['Customer', 'Overdue', 'Oldest unpaid sale', 'Days overdue'], od.map((o) => [o.c.name, naira(o.amount), o.items[0].d, o.late])) : '<p class="calm">No credit is more than 14 days old.</p>', how: 'Credit counts as overdue when part of a sale is still unpaid 14 days later. Payments are matched to the oldest sales first.' },
     slow: { t: 'Slow-moving stock', h: 'No sales in the last 30 days', d: 'Sep 28 – Oct 27', body: slow.length ? tbl(['Product', 'In stock', 'Value tied up', 'Last sale'], slow.map((p) => [p.name, totalStock(p), naira(totalStock(p) * p.cost), p.lastSale || '—'])) : '<p class="calm">Everything has sold in the last 30 days.</p>', how: 'Products with stock but no sales in the last 30 days. “Value tied up” uses the average cost of the stock you hold.' },
     action: { t: 'Recommended action', h: 'Why this comes first', d: 'Today', body: re.length ? tbl(['Product', 'In stock', 'Sells a day', 'Suggested order'], re.map((p) => [p.name, totalStock(p), usualRate(p) || '—', `${Math.max(1, Math.ceil((usualRate(p) * 14) / PER))} ctn`])) : '<p class="calm">Nothing needs restocking.</p>', how: 'Out-of-stock products that still have demand come first, then low stock, then overdue credit. The suggested order covers about two weeks at the usual rate. It’s a suggestion: nothing is ordered for you.' },
   }[key];
@@ -1088,11 +1217,11 @@ const ACT = {
   ask: (b) => ask(b.dataset.v, SUGGEST.find((x) => x[0] === b.dataset.v)[1]),
   newchat: () => { S.chat = []; S.busy = false; render(); },
 };
-function ask(key, q) {
+function ask(key, q, arg) {
   if (!S.online) return;
   if (S.left <= 0) { toast('No questions left today in this sample.'); return; }
   S.left -= 1;
-  S.chat.push({ q, key });
+  S.chat.push({ q, key, arg });
   S.busy = !reduced && Boolean(key);
   render();
   const box = $('.ask', body);
@@ -1141,7 +1270,8 @@ stage.addEventListener('submit', (e) => {
   const ta = $('#ask-q', stage);
   const q = ta.value.trim();
   if (!q) return;
-  ask(matchQuestion(q), q);
+  const m = matchQuestion(q);
+  ask(m.key, q, m.arg);
   $('#ask-q', stage)?.focus();
 });
 stage.addEventListener('keydown', (e) => {
