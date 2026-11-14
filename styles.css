@@ -117,6 +117,7 @@ svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width:
 .hero-copy { display: flex; flex-direction: column; align-items: center; text-align: center; }
 .hero h1 { max-width: 1180px; font-size: clamp(38px, 5vw, 64px); font-weight: 700; line-height: 1.06; letter-spacing: -0.035em; text-wrap: balance; }
 .hero h1 .hl { color: var(--blue); }
+.fit { max-width: 720px; margin-top: 20px; font-size: 20px; font-weight: 500; line-height: 1.55; color: var(--navy); text-wrap: pretty; }
 .tagline { margin-top: 20px; font-size: 24px; font-weight: 600; line-height: 1.3; letter-spacing: -0.01em; color: var(--navy); }
 .tagline + .lead { margin-top: 16px; }
 .lead { max-width: 600px; margin-top: 28px; font-size: 20px; line-height: 1.6; color: var(--muted); text-wrap: pretty; }
@@ -982,6 +983,7 @@ svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width:
   .bar-actions .btn-sm:not(.btn-ghost) { margin-left: 4px; }
   .hero { padding: 56px 0 48px; }
   .lead { margin-top: 20px; font-size: 17px; }
+  .fit { margin-top: 16px; font-size: 17px; }
   .tagline { margin-top: 14px; font-size: 20px; }
   .tagline + .lead { margin-top: 12px; }
   .cta-row { margin-top: 20px; }
