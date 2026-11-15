@@ -761,6 +761,10 @@ const ASK = {
     const low = totalStock(p) < p.reorder ? ` Across both warehouses it’s below its reorder level of ${p.reorder}.` : '';
     return { h: head, p: note + low, ev: `<ul class="a-list">${WAREHOUSES.map((w) => `<li><span><b>${w.name}</b><small>${p.stock[w.id]} units</small></span><em>${ctnShort(p.stock[w.id])}</em></li>`).join('')}</ul>`, foot: `Based on stock records for ${p.name}, ${TODAY_LABEL.short}`, view: 'inventory' };
   },
+  pick({ word, opts = [] } = {}) {
+    const names = opts.map((id) => P(id).name);
+    return { h: `More than one product matches “${esc(word)}”: ${names.join(' or ')}. Which one do you mean?`, p: 'Name the product and I’ll give you its stock in cartons and loose units for each warehouse.', ev: `<ul class="a-list">${opts.map((id) => { const p = P(id); return `<li><span><b>${p.name}</b><small>${p.sku}</small></span><em>${ctnShort(totalStock(p))}</em></li>`; }).join('')}</ul>`, foot: `${names.length} products match “${esc(word)}”`, view: 'inventory' };
+  },
   which({ wh, name } = {}) {
     return { h: name ? `I can’t find a product called “${esc(name)}” in your inventory.` : 'Which product do you want the stock count for?', p: `${name ? 'Check the name, or pick one of your products. ' : ''}I can give the count in cartons and loose units${wh ? ` for ${WH_NAME[wh]}` : ' for each warehouse'}.${name ? '' : ' I couldn’t match a product in your inventory from that question.'} Try, for example, “How many cartons of sugar are in the secondary warehouse?”`, ev: `<ul class="a-list">${PRODUCTS.slice(0, 6).map((p) => `<li><span><b>${p.name}</b><small>${p.sku}</small></span><em>${ctnShort(wh ? p.stock[wh] : totalStock(p))}</em></li>`).join('')}</ul>`, foot: `Showing 6 of ${PRODUCTS.length} products${wh ? ` in ${WH_NAME[wh]}` : ' across both warehouses'}`, view: 'inventory' };
   },
@@ -839,7 +843,7 @@ const ASK = {
 /* Read the question for what it is about (a product, a warehouse, a customer, a period) and what it asks
    (stock, sales, profit, overdue credit…). A question we can't place gets a clarifying reply, never a different answer. */
 const PRODUCT_WORDS = [
-  ['paste', /tomato paste|\bpaste\b/], ['tomato', /tin(ned)? tomato|\btomato(es)?\b/], ['noodles', /noodle/], ['sugar', /\bsugar/],
+  ['paste', /tomato paste|\bpaste\b/], ['tomato', /tin(ned)? tomato|\btins? of tomato/], ['noodles', /noodle/], ['sugar', /\bsugar/],
   ['oil', /\boil\b/], ['milk', /\bmilk/], ['cola', /\bcola\b|\bcoke\b|soft drink/], ['detergent', /detergent|washing powder|soap powder/],
   ['cereal', /cereal/], ['sardines', /sardine/],
 ];
@@ -861,7 +865,9 @@ function matchQuestion(text) {
   const period = periodOf(t);
   if (/net profit|net income|\bexpenses?\b|overhead|\brent\b|salar|wages/.test(t)) return { key: 'net', arg: { period } };
   if (/profit|margin|\bgp\b|gross/.test(t)) return { key: 'profit', arg: { period } };
-  if (/overdue|past due|past-due|\blate\b|\bdefault|owing too long|not paid on time/.test(t)) return { key: 'overdue', arg: { cust } };
+  if (/overdue|past due|past-due|\blate\b|\bdefault|owing too long|not paid on time|missed (a |their |the )?payment|(hasn'?t|haven'?t|has not|have not|didn'?t|did not) (paid|pay)|not paid|behind on/.test(t)) return { key: 'overdue', arg: { cust } };
+  // "tomato" alone matches two products — ask which, never pick one.
+  if (!prod && /\btomato(es)?\b/.test(t)) return { key: 'pick', arg: { word: 'tomato', opts: ['paste', 'tomato'] } };
   if (prod) {
     if (/price|how much (is|does|for)|cost/.test(t) && !SALES_W.test(t) && !STOCK_W.test(t)) return { key: 'price', arg: { prod } };
     if (SALES_W.test(t) && !/\bleft\b|in stock/.test(t)) return { key: 'psales', arg: { prod, wh, period } };
