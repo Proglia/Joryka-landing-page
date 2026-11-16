@@ -1616,6 +1616,10 @@ form.addEventListener('submit', async (e) => {
   }, { threshold: 0.35 }).observe(scene);
 })();
 
+// joryka.com/#walkthrough (linked from the app's Getting Started page) opens
+// the playground straight into the cosmetics walkthrough.
+if (location.hash === '#walkthrough') requestAnimationFrame(() => $('[data-try="walk"]')?.click());
+
 /* ---------------------------------------------------------------- tour video */
 (function tour() {
   const frame = $('.tour-frame');
