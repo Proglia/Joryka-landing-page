@@ -1,0 +1,19 @@
+name: CI
+
+# Runs on every pull request, and is reused by the deploy workflow so that
+# production is never deployed from a commit that has not passed these checks.
+on:
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate site (required files, JS syntax, asset references)
+        run: node .github/scripts/check-site.mjs
