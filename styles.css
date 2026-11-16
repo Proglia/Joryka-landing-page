@@ -1139,3 +1139,31 @@ svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width:
   .btn, .toast, .o-scene, .tile-ico, .tile-label, .pc-prices button, .net, .try svg, .ab, .rail-list button::after { transition: none; }
   .notice, .notice.out { animation: none; transition: none; transform: none; }
 }
+
+/* ---------------------------------------------------------------- cosmetics walkthrough (playground) */
+.guide { margin: 12px 14px 0; padding: 12px 14px; border: 1px solid #BEDBFF; border-radius: 12px; background: var(--blue-50); color: var(--ink); font-size: 13px; }
+.guide svg { width: 16px; height: 16px; flex: none; }
+.guide.mini { display: flex; align-items: center; gap: 12px; justify-content: space-between; }
+.guide.mini p, .g-top p { display: flex; align-items: flex-start; gap: 8px; color: var(--blue-700); }
+.guide.mini p span { display: flex; flex-direction: column; color: var(--navy-600); }
+.guide.mini p b, .g-top b { color: var(--blue-700); font-size: 14px; }
+.g-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.g-top span { color: var(--navy-600); }
+.g-steps { display: grid; gap: 8px; margin: 10px 0 0; padding: 0; list-style: none; }
+.g-steps li { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; background: var(--white); opacity: 0.6; }
+.g-steps li.now { opacity: 1; box-shadow: 0 0 0 2px var(--blue); }
+.g-steps li.ok { opacity: 1; }
+.g-steps li p { display: flex; flex: 1; flex-direction: column; gap: 2px; }
+.g-steps small { color: var(--navy-600); }
+.g-n { display: grid; place-items: center; width: 24px; height: 24px; flex: none; border-radius: 50%; background: var(--navy-100); font-weight: 700; }
+.g-steps li.ok .g-n { background: var(--green-50); color: var(--green-700); }
+.g-steps li.now .g-n { background: var(--blue); color: var(--white); }
+.g-result { margin-top: 10px; padding: 12px; border-radius: 10px; background: var(--white); }
+.g-rh { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; color: var(--green-700); font-weight: 700; }
+.g-result ul { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+.g-result li { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; border: 1px solid var(--navy-100); border-radius: 10px; }
+.g-result li span { color: var(--navy-600); font-size: 12px; }
+.g-result li b { font-size: 15px; }
+.g-result li small { color: var(--muted); font-size: 12px; }
+.g-links { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+@media (max-width: 560px) { .guide.mini { flex-direction: column; align-items: stretch; } .g-steps li { flex-wrap: wrap; } }

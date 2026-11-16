@@ -104,8 +104,13 @@ const PRODUCTS = [
   { id: 'cereal', name: 'Breakfast Cereal 500g', sku: 'CRL-500', cat: 'Food', unit: 2400, ctn: 28800, cost: 2050, stock: { primary: 22, secondary: 0 }, reorder: 12, rate: { primary: 0, secondary: 0 }, week: 0, lastSale: '4 Sep' },
   { id: 'paste', name: 'Tomato Paste 70g', sku: 'TMP-070', cat: 'Food', unit: 250, ctn: 3000, cost: 200, stock: { primary: 80, secondary: 40 }, reorder: 24, rate: { primary: 8, secondary: 3 }, week: 74, exp: 3 },
   { id: 'sardines', name: 'Sardines 125g', sku: 'SRD-125', cat: 'Food', unit: 850, ctn: 10200, cost: 720, stock: { primary: 36, secondary: 0 }, reorder: 12, rate: { primary: 3, secondary: 1 }, week: 31 },
+  { id: 'lipgloss', name: 'Lip Gloss Clear Shine 8ml', sku: 'LPG-008', cat: 'Cosmetics', unit: 2500, ctn: 28800, cost: 1900, stock: { primary: 7, secondary: 24 }, reorder: 24, rate: { primary: 2, secondary: 1 }, week: 19 },
+  { id: 'fdn110', name: 'Foundation 30ml, Shade 110 Ivory', sku: 'FDN-110', cat: 'Cosmetics', unit: 6500, ctn: 75600, cost: 5200, stock: { primary: 18, secondary: 12 }, reorder: 12, rate: { primary: 1, secondary: 0.5 }, week: 9 },
+  { id: 'fdn330', name: 'Foundation 30ml, Shade 330 Honey', sku: 'FDN-330', cat: 'Cosmetics', unit: 6500, ctn: 75600, cost: 5200, stock: { primary: 26, secondary: 12 }, reorder: 12, rate: { primary: 2, secondary: 1 }, week: 15 },
+  { id: 'fdn510', name: 'Foundation 30ml, Shade 510 Espresso', sku: 'FDN-510', cat: 'Cosmetics', unit: 6500, ctn: 75600, cost: 5200, stock: { primary: 9, secondary: 0 }, reorder: 12, rate: { primary: 1, secondary: 0 }, week: 6 },
+  { id: 'powder', name: 'Face Powder Translucent 20g', sku: 'FPW-020', cat: 'Cosmetics', unit: 4200, ctn: 48000, cost: 3400, stock: { primary: 30, secondary: 24 }, reorder: 12, rate: { primary: 2, secondary: 1 }, week: 14 },
 ];
-const CATS = ['All', 'Food', 'Beverages', 'Household'];
+const CATS = ['All', 'Food', 'Beverages', 'Household', 'Cosmetics'];
 const CUSTOMERS = [
   { id: 'aisha', name: 'Aisha Bello', phone: '0803 555 0142', place: 'Lagos Island', ledger: [
     { d: '14/10/2026', time: '10:42', type: 'Sale', desc: 'Sales Invoice #TXN-0231', a: 20000, staff: 'Bisi Okoro' },
@@ -185,7 +190,7 @@ const S = {
   custFilter: 'All', custQ: '', moneyCust: 'all',
   quoFilter: 'All', quoOpen: null, invFulfil: 'All', invPay: 'All', invOpen: null, flash: null,
   range: 'week', attnAll: false, chat: [], left: 50, busy: false,
-  modal: null, ret: null,
+  modal: null, ret: null, guide: null,
 };
 
 const P = (id) => PRODUCTS.find((p) => p.id === id);
@@ -429,6 +434,9 @@ $$('[data-try]').forEach((b) => b.addEventListener('click', () => {
   if (f === 'offline') {
     showFeature('pos', true);
     if (S.online) setOnline(false);
+  } else if (f === 'walk') {
+    showFeature('stock', true);
+    ACT['g-start']();
   } else showFeature(f, true);
   if (phone.matches) openApp(b);
   else play.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'center' });
@@ -462,7 +470,7 @@ PAGE.dashboard = () => {
   const max = Math.max(...w.days.map((d) => d.total));
   const pts = w.days.map((d, i) => [20 + i * (560 / 6), 150 - (d.total / max) * 128]);
   const line = pts.map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
-  const cats = ['Food', 'Beverages', 'Household'].map((c) => ({ c, v: sum(PRODUCTS.filter((p) => p.cat === c), (p) => weekUnits(p) * p.unit) }));
+  const cats = CATS.slice(1).map((c) => ({ c, v: sum(PRODUCTS.filter((p) => p.cat === c), (p) => weekUnits(p) * p.unit) }));
   const cmax = Math.max(...cats.map((x) => x.v));
   return head('Dashboard', TODAY_LABEL.long, abtn('Open Point of Sale', 'i-cart', 'primary', 'nav', 'data-pg="pos"'))
     + `<div class="kpis k3 dash">
@@ -548,7 +556,7 @@ PAGE.inventory = () => {
       return `<tr><td><span class="prod">${'<span class="pbox">' + ico('i-package') + '</span>'}<span><b>${p.name}</b><small>${p.sku}</small>${p.exp ? `<em class="exp">Exp ${p.exp}d</em>` : ''}</span></span></td>
         <td class="r hide-s">${conv(p.unit, S.currency)}<small>${conv(p.ctn, S.currency)} / ctn</small></td>
         <td class="r"><b>${n} units</b><small>${ctnShort(n)}</small></td><td>${status[level(n, p)]}</td>
-        <td class="hide-s"><span class="acts">${acts.map(([i, l, t]) => iconBtn(i, l, 'sample', '', t)).join('')}</span></td></tr>`;
+        <td class="hide-s"><span class="acts">${acts.map(([i, l, t]) => (l === 'Stock in' ? iconBtn(i, `Stock in ${p.name}`, 'stockin', `data-id="${p.id}"`, t) : iconBtn(i, l, 'sample', '', t))).join('')}</span></td></tr>`;
     }).join('') || `<tr><td colspan="5">${empty(S.invCat === 'Archived' ? 'No archived products' : 'No products found', 'Try another search or category.')}</td></tr>`}</tbody></table></div>`;
 };
 
@@ -845,9 +853,10 @@ const ASK = {
 const PRODUCT_WORDS = [
   ['paste', /tomato paste|\bpaste\b/], ['tomato', /tin(ned)? tomato|\btins? of tomato/], ['noodles', /noodle/], ['sugar', /\bsugar/],
   ['oil', /\boil\b/], ['milk', /\bmilk/], ['cola', /\bcola\b|\bcoke\b|soft drink/], ['detergent', /detergent|washing powder|soap powder/],
-  ['cereal', /cereal/], ['sardines', /sardine/],
+  ['cereal', /cereal/], ['sardines', /sardine/], ['lipgloss', /lip ?gloss/], ['powder', /face powder|\bpowder\b/],
+  ['fdn110', /\b110\b|ivory/], ['fdn330', /\b330\b|honey/], ['fdn510', /\b510\b|espresso/],
 ];
-const WH_WORDS = [['secondary', /\bsecondary\b|\bsecond warehouse|ojota|\bdepot\b/], ['primary', /\bprimary\b|\bmain (warehouse|store|shop)|idumota|store ?room/]];
+const WH_WORDS = [['secondary', /\bsecondary\b|\bsecond warehouse|ojota|\bdepot\b|warehouse b\b/], ['primary', /\bprimary\b|\bmain (warehouse|store|shop)|idumota|store ?room|warehouse a\b/]];
 const SALES_W = /\bsold\b|\bsell|\bsales?\b|revenue|takings|turnover|\bmade\b|\bearn/;
 const STOCK_W = /how many|how much .* (have|left|got)|\bstock\b|\bleft\b|\bremain|cartons?|\bctn|\bunits?\b|inventory|quantity|\bqty\b|\bhave\b|on hand|available/;
 function periodOf(t) {
@@ -868,6 +877,7 @@ function matchQuestion(text) {
   if (/overdue|past due|past-due|\blate\b|\bdefault|owing too long|not paid on time|missed (a |their |the )?payment|(hasn'?t|haven'?t|has not|have not|didn'?t|did not) (paid|pay)|not paid|behind on/.test(t)) return { key: 'overdue', arg: { cust } };
   // "tomato" alone matches two products — ask which, never pick one.
   if (!prod && /\btomato(es)?\b/.test(t)) return { key: 'pick', arg: { word: 'tomato', opts: ['paste', 'tomato'] } };
+  if (!prod && /\bfoundation\b/.test(t)) return { key: 'pick', arg: { word: 'foundation', opts: ['fdn110', 'fdn330', 'fdn510'] } };
   if (prod) {
     if (/price|how much (is|does|for)|cost/.test(t) && !SALES_W.test(t) && !STOCK_W.test(t)) return { key: 'price', arg: { prod } };
     if (SALES_W.test(t) && !/\bleft\b|in stock/.test(t)) return { key: 'psales', arg: { prod, wh, period } };
@@ -993,11 +1003,66 @@ function closeLayer(restore = true) {
   renderLayer();
   if (restore && S.ret) { render(); $(S.ret, stage)?.focus(); }
 }
+/* ---------------------------------------------------------------- stock in (receive by carton) */
+function stockInModal() {
+  const m = S.modal;
+  const p = P(m.id);
+  const add = (parseInt(m.ctn, 10) || 0) * PER + (parseInt(m.u, 10) || 0);
+  return `<div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-t"><div class="m-h"><p id="m-t">${ico('i-truck')}Stock in · ${p.name}</p>${iconBtn('i-x', 'Close', 'close')}</div>
+    <div class="m-b">
+      <p class="m-l" id="si-wh">Receive into</p><div class="methods" role="radiogroup" aria-labelledby="si-wh">${WAREHOUSES.map((w) => `<button type="button" role="radio" aria-checked="${m.wh === w.id}" data-act="si-wh" data-v="${w.id}">${ico('i-warehouse')}${w.name}${w.id === 'primary' ? ' (A)' : ' (B)'}</button>`).join('')}</div>
+      <div class="q3"><label class="fld"><span>Cartons</span><input inputmode="numeric" data-in="si-ctn" value="${esc(m.ctn)}"></label><label class="fld"><span>Loose units</span><input inputmode="numeric" data-in="si-u" value="${esc(m.u)}"></label><label class="fld"><span>Units per carton</span><input value="${PER}" readonly></label></div>
+      <p class="credit-note soft"><small>Now in ${WH_NAME[m.wh]}: ${ctnWords(p.stock[m.wh])}</small><small>After receiving: <b>${ctnWords(p.stock[m.wh] + add)}</b> (+${add} units)</small></p>
+      ${m.error ? `<p class="m-err" role="alert">${m.error}</p>` : ''}</div>
+    <div class="m-f"><button type="button" class="ab outline" data-act="close">Close</button><button type="button" class="ab primary" data-act="si-ok">${ico('i-check')}Receive stock</button></div></div>`;
+}
+
+/* ---------------------------------------------------------------- cosmetics walkthrough
+   Receive lip gloss by the carton into Warehouse A (Primary), sell 2 cartons and 3 units
+   to a customer, take a part-payment, then show stock left, amount paid and amount owed. */
+const G = { prod: 'lipgloss', recv: 5, ctns: 2, units: 3, cust: 'aisha', pay: 40000 };
+function guideHTML() {
+  if (!S.guide) {
+    return S.page === 'pos' || S.page === 'inventory'
+      ? `<div class="guide mini"><p>${ico('i-spark')}<span><b>Cosmetics walkthrough</b>Receive lip gloss by the carton, sell 2 cartons and 3 units, take a part-payment.</span></p>${abtn('Start', 'i-arrow', 'primary', 'g-start')}</div>`
+      : '';
+  }
+  const g = S.guide;
+  const p = P(G.prod);
+  const sale = g.sale ? S.sales.find((x) => x.n === g.sale) : null;
+  const inCart = S.cart.some((l) => l.id === G.prod);
+  const done = [g.received > 0, !!sale || inCart, !!sale];
+  const cur = done.indexOf(false);
+  const steps = [
+    ['Receive lip gloss into Warehouse A', `Stock in ${G.recv} cartons (${G.recv * PER} units) of ${p.name} to the Primary Warehouse.`, abtn(`Receive ${G.recv} cartons`, 'i-truck', 'primary', 'g-recv')],
+    ['Sell 2 cartons and 3 units', `Put ${G.ctns} cartons and ${G.units} single units in the cart for ${C(G.cust).name}, selling from Warehouse A.`, abtn('Fill the cart', 'i-cart', 'primary', 'g-cart')],
+    ['Take a part-payment', `Choose <b>Partial</b> and record ${naira(G.pay)} paid now. The rest goes on ${C(G.cust).name}’s account.`, abtn('Take payment', 'i-wallet', 'primary', 'g-pay', inCart ? '' : 'disabled')],
+  ];
+  let result = '';
+  if (sale) {
+    const left = p.stock.primary;
+    const owed = sale.total - sale.paid;
+    result = `<div class="g-result" aria-live="polite">
+      <p class="g-rh">${ico('i-check')}Result of sale #${sale.n}</p>
+      <ul>
+        <li><span>Lip gloss left in Warehouse A</span><b>${ctnWords(left)}</b><small>${g.before} before · +${g.received} received · −${sum(sale.lines.filter((l) => l.id === G.prod), units)} sold = ${left} units</small></li>
+        <li><span>Sale total</span><b>${naira(sale.total)}</b><small>${sale.lines.map((l) => `${qtyLabel(l)} × ${naira(price(l))}`).join(' + ')}</small></li>
+        <li><span>Paid now</span><b class="c-green">${naira(sale.paid)}</b><small>${methodName[sale.method]} payment</small></li>
+        <li><span>Customer still owes on this sale</span><b class="c-red">${naira(owed)}</b><small>${sale.cust === 'walkin' ? 'Walk-in customer' : `${custName(sale.cust)} now owes ${naira(balance(C(sale.cust)))} in total`}</small></li>
+        <li><span>Sync status</span><b>${sale.synced ? 'Synced' : 'Saved on this device'}</b><small>${sale.synced ? 'Already on the server.' : `Switch the network back on to sync${S.pending ? ` (${S.pending} pending)` : ''}.`}</small></li>
+      </ul>
+      <p class="g-links">${abtn('Receipt', 'i-invoice', 'outline', 'receipt', `data-n="${sale.n}"`)}${abtn('See stock', 'i-package', 'outline', 'nav', 'data-pg="inventory"')}${abtn('See what they owe', 'i-book', 'outline', 'nav', 'data-pg="money"')}${abtn('Ask Joryka AI', 'i-spark', 'outline', 'g-ask')}</p>
+    </div>`;
+  }
+  return `<div class="guide"><div class="g-top"><p>${ico('i-spark')}<b>Cosmetics walkthrough</b><span>${sale ? 'All 3 steps done' : `Step ${cur + 1} of 3`}</span></p>${abtn('End', 'i-x', 'outline', 'g-end')}</div>
+    ${sale ? '' : `<ol class="g-steps">${steps.map(([h, d, b], i) => `<li class="${done[i] ? 'ok' : i === cur ? 'now' : ''}"><span class="g-n">${done[i] ? ico('i-check') : i + 1}</span><p><b>${h}</b><small>${d}</small></p>${i === cur ? b : ''}</li>`).join('')}</ol>`}${result}</div>`;
+}
+
 function renderLayer() {
   layer.hidden = !S.modal;
   if (!S.modal) { layer.innerHTML = ''; layer.className = 'layer'; return; }
   layer.className = `layer ${S.modal.type === 'panel' ? 'side' : ''}`;
-  layer.innerHTML = { pay: payModal, receipt: receiptModal, quote: quoteModal, panel: () => panelHTML(S.modal.key) }[S.modal.type]();
+  layer.innerHTML = { pay: payModal, receipt: receiptModal, quote: quoteModal, stockin: stockInModal, panel: () => panelHTML(S.modal.key) }[S.modal.type]();
 }
 layer.addEventListener('click', (e) => { if (e.target === layer) closeLayer(); });
 stage.addEventListener('keydown', (e) => {
@@ -1022,7 +1087,7 @@ function render() {
   const caret = document.activeElement?.selectionStart;
   $$('[data-act="nav"]', rail).forEach((b) => { if (b.dataset.pg === S.page) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
   body.dataset.pg = S.page;
-  body.innerHTML = PAGE[S.page]();
+  body.innerHTML = guideHTML() + PAGE[S.page]();
   banner.innerHTML = !S.online
     ? `<p class="bn off">${ico('i-wifi-off')}<span><b>You’re offline</b>Your changes are saved locally and will sync once you’re back online.</span>${S.pending ? `<em>${S.pending} pending</em>` : ''}</p>`
     : S.syncing ? `<p class="bn sync">${ico('i-refresh')}<span><b>Syncing changes…</b>Uploading ${S.syncing} pending transaction${S.syncing === 1 ? '' : 's'} to the server.</span></p>` : '';
@@ -1074,6 +1139,7 @@ function recordSale(method, paid) {
   const sale = { n: S.receipt, time: clock(), cust: S.customer, lines, sub, disc, total, method, paid, wh: S.wh, synced: S.online };
   lines.forEach((l) => { P(l.id).stock[S.wh] -= units(l); });
   S.sales.push(sale);
+  if (S.guide && !S.guide.sale && lines.some((l) => l.id === 'lipgloss')) S.guide.sale = sale.n;
   if (S.customer !== 'walkin' && total - paid > 0) {
     C(S.customer).ledger.push({ d: TODAY_LABEL.date, time: sale.time, type: 'Sale', desc: `Sales Invoice #TXN-${sale.n}`, a: total - paid, staff: 'Admin User', fresh: true, pending: !S.online });
   }
@@ -1152,6 +1218,35 @@ const ACT = {
     }
   },
   close: () => closeLayer(),
+  stockin: (b) => openLayer({ type: 'stockin', id: b.dataset.id, wh: 'primary', ctn: '1', u: '0' }, b),
+  'si-wh': (b) => { S.modal.wh = b.dataset.v; renderLayer(); $(`[data-act="si-wh"][data-v="${b.dataset.v}"]`, layer)?.focus(); },
+  'si-ok': () => {
+    const m = S.modal;
+    const add = (parseInt(m.ctn, 10) || 0) * PER + (parseInt(m.u, 10) || 0);
+    if (add <= 0) { m.error = 'Enter at least one carton or unit.'; renderLayer(); return; }
+    const p = P(m.id);
+    p.stock[m.wh] += add;
+    if (S.guide && m.id === G.prod && m.wh === 'primary') S.guide.received += add;
+    queue();
+    S.modal = null;
+    render();
+    toast(`Received ${qtyLabel({ kind: 'ctn', qty: parseInt(m.ctn, 10) || 0 })}${parseInt(m.u, 10) ? ` + ${parseInt(m.u, 10)} units` : ''} of ${p.name} into ${WH_NAME[m.wh]}${S.online ? '' : ' on this device'}`);
+  },
+  'g-start': () => { S.guide = { before: P(G.prod).stock.primary, received: 0, sale: null }; S.invCat = 'Cosmetics'; go('inventory'); },
+  'g-end': () => { S.guide = null; render(); },
+  'g-recv': (b) => { if (S.page !== 'inventory') { S.invCat = 'Cosmetics'; go('inventory'); } openLayer({ type: 'stockin', id: G.prod, wh: 'primary', ctn: String(G.recv), u: '0' }, b); },
+  'g-cart': () => {
+    S.wh = 'primary'; S.cat = 'Cosmetics'; S.customer = G.cust;
+    S.cart = [{ id: G.prod, kind: 'ctn', qty: G.ctns }, { id: G.prod, kind: 'unit', qty: G.units }];
+    S.cartOpen = true;
+    go('pos');
+  },
+  'g-pay': (b) => {
+    if (S.page !== 'pos') go('pos');
+    const sub = linesTotal(S.cart);
+    openLayer({ type: 'pay', kind: 'sale', due: sub - discount(sub), cust: S.customer, method: 'partial', amount: String(G.pay) }, b);
+  },
+  'g-ask': () => { go('ai'); const q = 'How many cartons of lip gloss are in Warehouse A?'; const m = matchQuestion(q); ask(m.key, q, m.arg); },
   receipt: (b) => { const n = Number(b.dataset.n); if (!n) { toast('Receipts for sales made before today’s demo are in the full app.'); return; } openLayer({ type: 'receipt', n }, b); },
   // inventory
   cur: (b) => { S.currency = b.dataset.v; render(); },
@@ -1258,6 +1353,7 @@ stage.addEventListener('input', (e) => {
   else if (k === 'disc') { S.disc.v = v.replace(/[^\d.]/g, ''); render(); }
   else if (k === 'm-amount') { m.amount = v.replace(/[^\d.]/g, ''); m.error = ''; renderLayer(); const el = $('[data-in="m-amount"]', layer); el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
   else if (k === 'q-qty') { m.lines[Number(t.dataset.i)].qty = Math.max(0, parseInt(v, 10) || 0); m.error = ''; renderLayer(); const el = $(`[data-in="q-qty"][data-i="${t.dataset.i}"]`, layer); el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
+  else if (k === 'si-ctn' || k === 'si-u') { m[k === 'si-ctn' ? 'ctn' : 'u'] = v.replace(/\D/g, ''); m.error = ''; renderLayer(); const el = $(`[data-in="${k}"]`, layer); el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
   else if (k === 'q-disc') { m.disc.v = v.replace(/[^\d.]/g, ''); renderLayer(); const el = $('[data-in="q-disc"]', layer); el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
 });
 stage.addEventListener('change', (e) => {
