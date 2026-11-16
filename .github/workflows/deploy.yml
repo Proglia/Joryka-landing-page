@@ -1,0 +1,121 @@
+name: Deploy to production
+
+# Production deploys happen ONLY from main (push after a merged PR, or a manual
+# re-run of main from the Actions tab). Feature branches and `dev` never deploy.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Never run two deployments at the same time; queue instead of cancelling.
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+env:
+  DOCROOT: /var/www/joryka-landing-page
+  SNAPSHOT_DIR: /home/deploy-joryka/snapshots
+  SNAPSHOTS_TO_KEEP: 10
+
+jobs:
+  validate:
+    if: github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    name: deploy
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: production   # holds the SSH secrets; can require manual approval
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Stage only the files that get published
+        run: |
+          set -euo pipefail
+          mkdir _site
+          cp index.html styles.css app.js _site/
+          cp -r assets _site/assets
+          find _site -type f | sort
+
+      - name: Configure SSH (dedicated key, pinned host key)
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+          cat > ~/.ssh/config <<EOF
+          Host deploy-target
+            HostName ${{ secrets.SSH_HOST }}
+            User ${{ secrets.SSH_USER }}
+            IdentityFile ~/.ssh/deploy_key
+            IdentitiesOnly yes
+            StrictHostKeyChecking yes
+            UserKnownHostsFile ~/.ssh/known_hosts
+            BatchMode yes
+          EOF
+
+      - name: Snapshot current production (rollback point)
+        id: snapshot
+        run: |
+          set -euo pipefail
+          SNAP="$SNAPSHOT_DIR/$(date -u +%Y%m%d-%H%M%S)-${GITHUB_SHA::7}"
+          ssh deploy-target "set -e
+            cp -a '$DOCROOT' '$SNAP'
+            # keep only the newest $SNAPSHOTS_TO_KEEP snapshots
+            ls -1dt '$SNAPSHOT_DIR'/*/ | tail -n +$((SNAPSHOTS_TO_KEEP + 1)) | xargs -r rm -rf"
+          echo "path=$SNAP" >> "$GITHUB_OUTPUT"
+          echo "Snapshot: $SNAP"
+
+      - name: Sync files to server
+        run: |
+          set -euo pipefail
+          RSH="ssh"   # uses ~/.ssh/config -> Host deploy-target
+          OPTS="-rlt --chmod=D755,F644 --itemize-changes"
+
+          # 1. Add/update assets first (no deletes) so new pages never point at missing files.
+          rsync $OPTS -e "$RSH" _site/assets/ deploy-target:$DOCROOT/assets/
+
+          # 2. Then the three top-level files (these never delete anything).
+          rsync $OPTS -e "$RSH" _site/index.html _site/styles.css _site/app.js deploy-target:$DOCROOT/
+
+          # 3. Finally remove assets that no longer exist in the repo.
+          #    --delete is scoped to the assets/ folder ONLY.
+          rsync $OPTS --delete -e "$RSH" _site/assets/ deploy-target:$DOCROOT/assets/
+
+      - name: Verify production (HTTP 200 and deployed files match this commit)
+        run: |
+          set -euo pipefail
+          sleep 3
+          for host in joryka.com www.joryka.com; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --retry 3 --retry-delay 3 "https://$host/")
+            echo "https://$host/ -> $code"
+            [ "$code" = "200" ] || { echo "::error::$host returned $code"; exit 1; }
+            for f in index.html styles.css app.js; do
+              want=$(sha256sum "_site/$f" | cut -d' ' -f1)
+              url="https://$host/$f"; [ "$f" = "index.html" ] && url="https://$host/"
+              got=$(curl -s --retry 3 --retry-delay 3 -H 'Cache-Control: no-cache' "$url" | sha256sum | cut -d' ' -f1)
+              [ "$want" = "$got" ] || { echo "::error::$host $f does not match commit ${GITHUB_SHA::7}"; exit 1; }
+            done
+          done
+          echo "Production verified at ${GITHUB_SHA::7}"
+
+      - name: Roll back to snapshot (deployment or verification failed)
+        if: failure() && steps.snapshot.outputs.path != ''
+        run: |
+          set -euo pipefail
+          ssh deploy-target "rsync -rlt --delete '${{ steps.snapshot.outputs.path }}/' '$DOCROOT/'"
+          echo "::warning::Deployment failed; restored ${{ steps.snapshot.outputs.path }}"
+
+      - name: Remove SSH key from runner
+        if: always()
+        run: rm -rf ~/.ssh/deploy_key
