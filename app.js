@@ -109,8 +109,18 @@ const PRODUCTS = [
   { id: 'fdn330', name: 'Foundation 30ml, Shade 330 Honey', sku: 'FDN-330', cat: 'Cosmetics', unit: 6500, ctn: 75600, cost: 5200, stock: { primary: 26, secondary: 12 }, reorder: 12, rate: { primary: 2, secondary: 1 }, week: 15 },
   { id: 'fdn510', name: 'Foundation 30ml, Shade 510 Espresso', sku: 'FDN-510', cat: 'Cosmetics', unit: 6500, ctn: 75600, cost: 5200, stock: { primary: 9, secondary: 0 }, reorder: 12, rate: { primary: 1, secondary: 0 }, week: 6 },
   { id: 'powder', name: 'Face Powder Translucent 20g', sku: 'FPW-020', cat: 'Cosmetics', unit: 4200, ctn: 48000, cost: 3400, stock: { primary: 30, secondary: 24 }, reorder: 12, rate: { primary: 2, secondary: 1 }, week: 14 },
+  { id: 'phone', name: 'Smartphone 6.5-inch, 128GB', sku: 'SPH-128', cat: 'Electronics', unit: 145000, ctn: 1680000, cost: 128000, stock: { primary: 9, secondary: 24 }, reorder: 12, rate: { primary: 1, secondary: 0.5 }, week: 4 },
+  { id: 'earbuds', name: 'Wireless Earbuds', sku: 'EBD-200', cat: 'Electronics', unit: 12500, ctn: 144000, cost: 9800, stock: { primary: 40, secondary: 36 }, reorder: 12, rate: { primary: 2, secondary: 1 }, week: 11 },
+  { id: 'powerbank', name: 'Power Bank 20,000mAh', sku: 'PWB-020', cat: 'Electronics', unit: 18000, ctn: 207000, cost: 14500, stock: { primary: 22, secondary: 12 }, reorder: 12, rate: { primary: 1, secondary: 1 }, week: 7 },
+  { id: 'charger', name: 'USB-C Fast Charger 25W', sku: 'CHG-025', cat: 'Electronics', unit: 4500, ctn: 51600, cost: 3300, stock: { primary: 60, secondary: 48 }, reorder: 24, rate: { primary: 4, secondary: 2 }, week: 26 },
+  { id: 'polo', name: 'Men’s Polo Shirt, Size L', sku: 'PLO-00L', cat: 'Fashion', unit: 8500, ctn: 96000, cost: 6200, stock: { primary: 34, secondary: 24 }, reorder: 12, rate: { primary: 2, secondary: 1 }, week: 10 },
+  { id: 'sneakers', name: 'Canvas Sneakers, Size 42', sku: 'SNK-042', cat: 'Fashion', unit: 15000, ctn: 172800, cost: 11500, stock: { primary: 18, secondary: 12 }, reorder: 12, rate: { primary: 1, secondary: 0.5 }, week: 5 },
+  { id: 'paracetamol', name: 'Paracetamol 500mg, 10 tablets', sku: 'PCM-500', cat: 'Health', unit: 400, ctn: 4500, cost: 300, stock: { primary: 140, secondary: 96 }, reorder: 48, rate: { primary: 12, secondary: 5 }, week: 110 },
+  { id: 'sanitizer', name: 'Hand Sanitizer 500ml', sku: 'HSN-500', cat: 'Health', unit: 2200, ctn: 25200, cost: 1700, stock: { primary: 26, secondary: 12 }, reorder: 12, rate: { primary: 2, secondary: 1 }, week: 12 },
+  { id: 'engineoil', name: 'Engine Oil 5W-30, 4L', sku: 'ENG-430', cat: 'Auto Parts', unit: 28000, ctn: 324000, cost: 23500, stock: { primary: 15, secondary: 12 }, reorder: 12, rate: { primary: 1, secondary: 0.5 }, week: 5 },
+  { id: 'brakepads', name: 'Brake Pads, Front Set', sku: 'BRK-001', cat: 'Auto Parts', unit: 16500, ctn: 190800, cost: 12800, stock: { primary: 10, secondary: 0 }, reorder: 12, rate: { primary: 0.5, secondary: 0 }, week: 3 },
 ];
-const CATS = ['All', 'Food', 'Beverages', 'Household', 'Cosmetics'];
+const CATS = ['All', 'Food', 'Beverages', 'Household', 'Cosmetics', 'Electronics', 'Fashion', 'Health', 'Auto Parts'];
 const CUSTOMERS = [
   { id: 'aisha', name: 'Aisha Bello', phone: '0803 555 0142', place: 'Lagos Island', ledger: [
     { d: '14/10/2026', time: '10:42', type: 'Sale', desc: 'Sales Invoice #TXN-0231', a: 20000, staff: 'Bisi Okoro' },
@@ -851,6 +861,9 @@ const ASK = {
 /* Read the question for what it is about (a product, a warehouse, a customer, a period) and what it asks
    (stock, sales, profit, overdue credit…). A question we can't place gets a clarifying reply, never a different answer. */
 const PRODUCT_WORDS = [
+  ['engineoil', /engine oil|motor oil|\b5w-?30\b/], ['brakepads', /brake/], ['earbuds', /ear ?buds?|earphones?|headphones?/], ['powerbank', /power ?banks?/],
+  ['charger', /charger/], ['phone', /smart ?phones?|\bphones?\b|\bmobiles?\b/], ['polo', /\bpolo|\bshirts?\b/], ['sneakers', /sneaker|\bshoes?\b|canvas/],
+  ['paracetamol', /paracetamol/], ['sanitizer', /saniti[sz]er/],
   ['paste', /tomato paste|\bpaste\b/], ['tomato', /tin(ned)? tomato|\btins? of tomato/], ['noodles', /noodle/], ['sugar', /\bsugar/],
   ['oil', /\boil\b/], ['milk', /\bmilk/], ['cola', /\bcola\b|\bcoke\b|soft drink/], ['detergent', /detergent|washing powder|soap powder/],
   ['cereal', /cereal/], ['sardines', /sardine/], ['lipgloss', /lip ?gloss/], ['powder', /face powder|\bpowder\b/],
