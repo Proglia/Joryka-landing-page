@@ -5,8 +5,8 @@ const CONFIG = {
   // Login: your local Joryka app when the page runs on localhost, otherwise the dev app.
   // For launch, replace the dev URL with the production app URL.
   loginUrl: ['localhost', '127.0.0.1'].includes(location.hostname)
-    ? 'http://localhost:5173/login'
-    : 'https://dev.joryka.com/login',
+    ? 'http://localhost:5173/login?from=landing'
+    : 'https://dev.joryka.com/login?from=landing',
   whatsappNumber: '2349022310523',  // Client's official Nigerian WhatsApp number.
   whatsappText: 'Hello Joryka, I would like to know more about the POS for my business.',
   // Demo form: your local Joryka backend when the page runs on localhost, otherwise the dev API.
