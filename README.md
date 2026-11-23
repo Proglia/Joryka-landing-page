@@ -62,6 +62,8 @@ assets/
 
 Upload them to any static host (Netlify, Vercel, Cloudflare Pages, GitHub Pages or S3). `docs/`, `DESIGN.md` and `PRODUCT.md` are reference material for the team and don't need to be published.
 
+**Share preview.** The Open Graph and Twitter tags in `index.html`'s `<head>` (one commented block) make links to the site show a preview card. They use absolute URLs on `https://joryka.com`: if the site moves to another domain, change the 4 URLs in that block. The preview image is `assets/joryka-og-card-standard.jpg` (1200×630, about 63 KB). If the card design changes, export it again at 1200×630, keep it under about 300 KB (WhatsApp skips larger images), and give it a new file name so apps that cached the old card fetch the new one.
+
 ## Documentation
 
 | File | Contents |
